@@ -21,10 +21,10 @@ global $wpdb;
  * Add your plugin's option keys to this array
  */
 $options = array(
-	'jpwbc_example_setting',
+	'jpwbc_settings',
+	// Legacy keys from older builds (harmless if absent).
 	'jpwbc_license_key',
 	'jpwbc_license_data',
-	// Add more options as needed
 );
 
 foreach ( $options as $option ) {

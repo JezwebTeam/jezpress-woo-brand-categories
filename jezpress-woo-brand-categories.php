@@ -164,20 +164,15 @@ function jpwbc_activate(): void {
 		);
 	}
 
-	// Set default options if they don't exist
-	$defaults = array(
-		'jpwbc_license_key'  => '',
-		'jpwbc_license_data' => array(),
-		// Add your plugin's default options here
-	);
-
-	foreach ( $defaults as $key => $value ) {
-		if ( false === get_option( $key ) ) {
-			add_option( $key, $value );
-		}
+	// Seed the single settings option with defaults if it does not exist yet.
+	// JPWBC_Admin owns the canonical defaults; load it so we never duplicate them here.
+	if ( false === get_option( 'jpwbc_settings' ) ) {
+		require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-admin.php';
+		add_option( 'jpwbc_settings', JPWBC_Admin::get_defaults() );
 	}
 
-	// Flush rewrite rules
+	// Rewrite rules are registered on `init` by JPWBC_Rewrites; flush so the
+	// clean brand+category URLs resolve immediately after activation.
 	flush_rewrite_rules();
 }
 register_activation_hook( __FILE__, 'jpwbc_activate' );
