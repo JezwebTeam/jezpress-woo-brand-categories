@@ -60,6 +60,9 @@ $license_option = 'jzwb_lic_' . substr( md5( 'jezpress-woo-brand-categories' ), 
 delete_option( $license_option );
 
 /**
- * Delete update cache transient for JezPress updater
+ * Delete the license-action feedback transient.
+ *
+ * (The updater's own cache transient, jpwbc_update_*, is already removed by the
+ * _transient_jpwbc_ LIKE cleanup above.)
  */
-delete_transient( 'jezpress-woo-brand-categories_update_info' );
+delete_transient( 'jezweb_license_message_jezpress-woo-brand-categories' );
