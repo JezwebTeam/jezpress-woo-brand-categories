@@ -3,7 +3,7 @@
  * Plugin Name: JezPress Woo Brand Categories
  * Plugin URI: https://jezpress.com/plugins/jezpress-woo-brand-categories
  * Description: In-brand product-category navigation and clean brand+category URLs for WooCommerce brand archives.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Jezweb
  * Author URI: https://jezpress.com
  * License: GPL-2.0+
@@ -76,7 +76,7 @@ if ( version_compare( PHP_VERSION, '8.1.0', '<' ) ) {
  *
  * @since 1.0.0
  */
-define( 'JPWBC_VERSION', '1.0.1' );
+define( 'JPWBC_VERSION', '1.0.2' );
 define( 'JPWBC_PLUGIN_FILE', __FILE__ );
 define( 'JPWBC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JPWBC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -306,6 +306,7 @@ function jpwbc_init(): void {
 	$loader->add_action( 'admin_menu', $admin, 'register_menu' );
 	$loader->add_action( 'admin_init', $admin, 'register_settings' );
 	$loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_admin_assets', 10, 1 );
+	$loader->add_action( 'admin_post_jpwbc_save_settings', $admin, 'handle_save_settings' );
 
 	// Initialize license (singleton pattern with required parameters)
 	$license = JPWBC_License::get_instance(

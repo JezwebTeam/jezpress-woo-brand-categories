@@ -395,6 +395,13 @@ class JPWBC_Admin {
 		<div class="wrap jpwbc-settings">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
+			<?php
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display-only flag after our nonce-protected save redirect.
+			if ( isset( $_GET['jpwbc_saved'] ) ) :
+				?>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'jezpress-woo-brand-categories' ); ?></p></div>
+			<?php endif; ?>
+
 			<nav class="nav-tab-wrapper">
 				<?php foreach ( $tabs as $tab_slug => $tab_label ) : ?>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $this->menu_slug . '&tab=' . $tab_slug ) ); ?>"
@@ -442,9 +449,10 @@ class JPWBC_Admin {
 	 */
 	private function render_settings_form( string $tab, string $page_slug ): void {
 		?>
-		<form method="post" action="options.php">
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php
-			settings_fields( self::OPTION_GROUP );
+			wp_nonce_field( 'jpwbc_save_settings', 'jpwbc_settings_nonce' );
+			echo '<input type="hidden" name="action" value="jpwbc_save_settings">';
 			printf(
 				'<input type="hidden" name="%s[_active_tab]" value="%s">',
 				esc_attr( self::OPTION_KEY ),
@@ -455,6 +463,50 @@ class JPWBC_Admin {
 			?>
 		</form>
 		<?php
+	}
+
+	/**
+	 * Handle the settings form submission.
+	 *
+	 * Posts to admin-post.php (not options.php) so the save never depends on the
+	 * WordPress `allowed_options` whitelist — which role/security plugins on
+	 * client sites can filter, silently dropping the save. The registered
+	 * `sanitize_settings()` callback still runs (via the `sanitize_option_*`
+	 * filter on update_option), so only allowlisted, sanitised keys are stored.
+	 *
+	 * @since 1.0.2
+	 */
+	public function handle_save_settings(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Permission denied.', 'jezpress-woo-brand-categories' ), 403 );
+		}
+
+		check_admin_referer( 'jpwbc_save_settings', 'jpwbc_settings_nonce' );
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_settings() (the registered sanitize_option_jpwbc_settings filter) rebuilds the option from an allowlist on update_option below.
+		$raw = isset( $_POST[ self::OPTION_KEY ] ) && is_array( $_POST[ self::OPTION_KEY ] )
+			? wp_unslash( $_POST[ self::OPTION_KEY ] )
+			: array();
+
+		$tab = isset( $raw['_active_tab'] ) ? sanitize_key( (string) $raw['_active_tab'] ) : 'general';
+
+		// Only persist for a known tab; otherwise it's a no-op (avoids a
+		// misleading "Settings saved" on a crafted/unknown tab).
+		if ( isset( self::TAB_KEYS[ $tab ] ) ) {
+			update_option( self::OPTION_KEY, $raw );
+		}
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'        => $this->menu_slug,
+					'tab'         => $tab,
+					'jpwbc_saved' => '1',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
 	}
 
 	/**
