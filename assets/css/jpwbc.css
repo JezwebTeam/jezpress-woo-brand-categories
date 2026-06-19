@@ -1,0 +1,152 @@
+/**
+ * JezPress Woo Brand Categories — front-end styles.
+ *
+ * Tuned to the Birch Wholesale sidebar: grey list, pink active state, teal
+ * accent. Selectors are namespaced under .jpwbc-brand-cats so they inherit the
+ * site's typography without clobbering theme styles.
+ *
+ * @since 1.0.0
+ */
+.jpwbc-brand-cats {
+	--jpwbc-pink: #9c5468;
+	--jpwbc-pink-light: #c98a9b;
+	--jpwbc-teal: #14b8a6;
+	--jpwbc-grey: #f4f4f5;
+	--jpwbc-border: #e2e2e6;
+	font-size: 0.95em;
+	line-height: 1.4;
+}
+
+.jpwbc-search {
+	margin-bottom: 0.75em;
+}
+
+.jpwbc-search__input {
+	width: 100%;
+	padding: 0.45em 0.6em;
+	border: 1px solid var(--jpwbc-border);
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+
+.jpwbc-brands,
+.jpwbc-cats {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.jpwbc-brand__row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.25em;
+	border-bottom: 1px solid var(--jpwbc-border);
+}
+
+.jpwbc-brand__link {
+	flex: 1 1 auto;
+	display: block;
+	padding: 0.5em 0.6em;
+	color: inherit;
+	text-decoration: none;
+}
+
+.jpwbc-brand.is-current > .jpwbc-brand__row > .jpwbc-brand__link {
+	font-weight: 600;
+	color: var(--jpwbc-pink);
+}
+
+.jpwbc-brand__link:hover,
+.jpwbc-brand__link:focus {
+	color: var(--jpwbc-pink);
+	background: var(--jpwbc-grey);
+}
+
+.jpwbc-brand__toggle {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2em;
+	height: 2em;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	color: var(--jpwbc-pink-light);
+}
+
+.jpwbc-chevron {
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 6px solid currentColor;
+	transition: transform 0.2s ease;
+}
+
+.jpwbc-no-motion .jpwbc-chevron {
+	transition: none;
+}
+
+.jpwbc-brand.is-open > .jpwbc-brand__row .jpwbc-chevron {
+	transform: rotate( 180deg );
+}
+
+.jpwbc-brand__panel {
+	padding: 0.25em 0 0.5em 0.6em;
+	background: var(--jpwbc-grey);
+}
+
+.jpwbc-cat > a {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5em;
+	padding: 0.35em 0.6em;
+	color: inherit;
+	text-decoration: none;
+	border-left: 3px solid transparent;
+}
+
+.jpwbc-cat > a:hover,
+.jpwbc-cat > a:focus {
+	color: var(--jpwbc-pink);
+	border-left-color: var(--jpwbc-teal);
+}
+
+.jpwbc-cat.is-active > a {
+	color: var(--jpwbc-pink);
+	font-weight: 600;
+	border-left-color: var(--jpwbc-pink);
+}
+
+.jpwbc-cat--all > a {
+	font-style: italic;
+}
+
+.jpwbc-cat__count {
+	flex: 0 0 auto;
+	min-width: 1.6em;
+	text-align: center;
+	font-size: 0.85em;
+	color: #6b6b70;
+	background: #fff;
+	border: 1px solid var(--jpwbc-border);
+	border-radius: 10px;
+	padding: 0 0.4em;
+}
+
+.jpwbc-loading,
+.jpwbc-error,
+.jpwbc-empty {
+	padding: 0.4em 0.6em;
+	margin: 0;
+	font-size: 0.9em;
+	color: #6b6b70;
+}
+
+.jpwbc-error {
+	color: #b32d2e;
+}

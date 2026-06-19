@@ -228,6 +228,40 @@ function jpwbc_load_textdomain(): void {
 add_action( 'init', 'jpwbc_load_textdomain' );
 
 /**
+ * Locate and load a plugin template, allowing theme overrides.
+ *
+ * Lookup order: child theme → parent theme → plugin. Themes override by placing
+ * a file at `{theme}/jezpress-woo-brand-categories/{name}`.
+ *
+ * @since 1.0.0
+ *
+ * @param string               $name Template file name (e.g. 'dropdown.php').
+ * @param array<string, mixed> $args Variables exposed to the template as $data.
+ * @return string Rendered template HTML.
+ */
+function jpwbc_get_template( string $name, array $args = array() ): string {
+	$name     = ltrim( str_replace( array( '..', "\0" ), '', $name ), '/' );
+	$located  = '';
+	$rel_path = 'jezpress-woo-brand-categories/' . $name;
+
+	$theme_file = locate_template( array( $rel_path ) );
+	if ( $theme_file ) {
+		$located = $theme_file;
+	} elseif ( file_exists( JPWBC_PLUGIN_DIR . 'templates/' . $name ) ) {
+		$located = JPWBC_PLUGIN_DIR . 'templates/' . $name;
+	}
+
+	if ( '' === $located ) {
+		return '';
+	}
+
+	$data = $args; // Exposed to the template.
+	ob_start();
+	include $located;
+	return (string) ob_get_clean();
+}
+
+/**
  * Include required class files
  *
  * @since 1.0.0
@@ -244,6 +278,13 @@ function jpwbc_include_files(): void {
 
 	// JezPress updater
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-updater.php';
+
+	// Feature classes (cache, query, rewrites, frontend, SEO).
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-cache.php';
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-query.php';
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-rewrites.php';
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-frontend.php';
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-seo-rankmath.php';
 }
 
 /**
@@ -297,10 +338,57 @@ function jpwbc_init(): void {
 		->set_license( $license->get_license_key() )
 		->initialize();
 
+	// --- Feature layer (requires WooCommerce; gated by licence + master toggle) ---
+	if ( class_exists( 'WooCommerce' ) ) {
+		$settings = JPWBC_Admin::get_settings();
+
+		// Cache busting always runs so data stays fresh even while unlicensed.
+		$cache = new JPWBC_Cache();
+		$cache->register_hooks();
+
+		$query    = new JPWBC_Query( $cache );
+		$feature  = $license->is_valid() && ! empty( $settings['enabled'] );
+		$rewrites = new JPWBC_Rewrites( $query, $feature && ! empty( $settings['clean_urls'] ) );
+
+		if ( $feature ) {
+			$rewrites->register_hooks();
+
+			$frontend = new JPWBC_Frontend( $query, $rewrites, $settings );
+			$frontend->register_hooks();
+
+			$seo = new JPWBC_SEO_RankMath( $query, $rewrites, $settings );
+			$seo->register_hooks();
+
+			// Register the Elementor widget when Elementor is active.
+			add_action( 'elementor/widgets/register', 'jpwbc_register_elementor_widget' );
+		}
+
+		// Admin Combo Preview + Cache tabs (available to admins regardless of licence).
+		if ( is_admin() ) {
+			require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-admin-feature.php';
+			$admin_feature = new JPWBC_Admin_Feature( $query, $cache, $rewrites, $settings );
+			$admin_feature->register_hooks();
+		}
+	}
+
 	// Run all hooks
 	$loader->run();
 }
 add_action( 'plugins_loaded', 'jpwbc_init', 20 );
+
+/**
+ * Register the Elementor widget.
+ *
+ * @since 1.0.0
+ *
+ * @param mixed $widgets_manager Elementor widgets manager.
+ */
+function jpwbc_register_elementor_widget( $widgets_manager ): void {
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-widget.php';
+	if ( class_exists( 'JPWBC_Elementor_Widget' ) && is_object( $widgets_manager ) && method_exists( $widgets_manager, 'register' ) ) {
+		$widgets_manager->register( new JPWBC_Elementor_Widget() );
+	}
+}
 
 /**
  * Surface the WooCommerce / product_brand dependency notice in admin.
