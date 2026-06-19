@@ -237,7 +237,7 @@ class JPWBC_Admin {
 	/**
 	 * Sanitise the settings option.
 	 *
-	 * Only the keys belonging to the submitted tab (`_active_tab`) are taken
+	 * Only the keys belonging to the submitted tab (`active_tab`) are taken
 	 * from the input; every other key is preserved from the stored option so a
 	 * single-tab save never wipes the other tab's values. Unchecked checkboxes
 	 * (absent from POST) are correctly stored as false for the active tab only.
@@ -251,7 +251,7 @@ class JPWBC_Admin {
 		$input  = is_array( $input ) ? $input : array();
 		$output = self::get_settings(); // Start from current, fully-defaulted values.
 
-		$active_tab = isset( $input['_active_tab'] ) ? sanitize_key( (string) $input['_active_tab'] ) : '';
+		$active_tab = isset( $input['active_tab'] ) ? sanitize_key( (string) $input['active_tab'] ) : '';
 		$keys       = self::TAB_KEYS[ $active_tab ] ?? array();
 
 		if ( empty( $keys ) ) {
@@ -317,7 +317,7 @@ class JPWBC_Admin {
 	 * @return array<string, mixed>
 	 */
 	private function strip_internal_keys( array $settings ): array {
-		unset( $settings['_active_tab'] );
+		unset( $settings['active_tab'], $settings['_active_tab'] );
 		return $settings;
 	}
 
@@ -439,7 +439,8 @@ class JPWBC_Admin {
 	/**
 	 * Render a Settings-API form for one tab.
 	 *
-	 * The hidden `_active_tab` field tells the sanitiser which keys this submit
+	 * The top-level `jpwbc_tab` field tells the handler (and in turn the
+	 * sanitiser, via the injected `active_tab` key) which keys this submit
 	 * is allowed to change.
 	 *
 	 * @since 1.0.0
@@ -453,9 +454,11 @@ class JPWBC_Admin {
 			<?php
 			wp_nonce_field( 'jpwbc_save_settings', 'jpwbc_settings_nonce' );
 			echo '<input type="hidden" name="action" value="jpwbc_save_settings">';
+			// Top-level field (no leading underscore): some WAF/security layers
+			// strip `_`-prefixed POST keys, which previously caused the sanitiser
+			// to lose the active tab and silently discard the save.
 			printf(
-				'<input type="hidden" name="%s[_active_tab]" value="%s">',
-				esc_attr( self::OPTION_KEY ),
+				'<input type="hidden" name="jpwbc_tab" value="%s">',
 				esc_attr( $tab )
 			);
 			do_settings_sections( $page_slug );
@@ -483,18 +486,23 @@ class JPWBC_Admin {
 
 		check_admin_referer( 'jpwbc_save_settings', 'jpwbc_settings_nonce' );
 
+		// Active tab comes from a top-level, non-underscore field so it survives
+		// WAF/security layers that strip `_`-prefixed POST keys.
+		$tab = isset( $_POST['jpwbc_tab'] ) ? sanitize_key( wp_unslash( $_POST['jpwbc_tab'] ) ) : 'general';
+		if ( ! isset( self::TAB_KEYS[ $tab ] ) ) {
+			$tab = 'general';
+		}
+
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_settings() (the registered sanitize_option_jpwbc_settings filter) rebuilds the option from an allowlist on update_option below.
 		$raw = isset( $_POST[ self::OPTION_KEY ] ) && is_array( $_POST[ self::OPTION_KEY ] )
 			? wp_unslash( $_POST[ self::OPTION_KEY ] )
 			: array();
 
-		$tab = isset( $raw['_active_tab'] ) ? sanitize_key( (string) $raw['_active_tab'] ) : 'general';
+		// Inject the tab the sanitiser keys off (handler-controlled, not from the
+		// option array, so it can never be stripped before sanitisation).
+		$raw['active_tab'] = $tab;
 
-		// Only persist for a known tab; otherwise it's a no-op (avoids a
-		// misleading "Settings saved" on a crafted/unknown tab).
-		if ( isset( self::TAB_KEYS[ $tab ] ) ) {
-			update_option( self::OPTION_KEY, $raw );
-		}
+		update_option( self::OPTION_KEY, $raw );
 
 		wp_safe_redirect(
 			add_query_arg(
