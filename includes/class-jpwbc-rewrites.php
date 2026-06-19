@@ -243,10 +243,9 @@ class JPWBC_Rewrites {
 	 * @param array<string, mixed> $settings The new settings.
 	 */
 	public function on_settings_saved( array $settings ): void {
-		// Ensure rules reflect the current clean-URL toggle on the next request.
-		if ( ! empty( $settings['clean_urls'] ) ) {
-			$this->add_rewrite_rules();
-		}
-		flush_rewrite_rules( false );
+		// Force a full rebuild of the rewrite rules on the next request. The new
+		// clean-URL value is read at construction next request, so this cleanly
+		// adds OR removes the combo rules whichever way the toggle moved.
+		delete_option( 'rewrite_rules' );
 	}
 }

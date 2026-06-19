@@ -189,7 +189,9 @@ class JPWBC_SEO_RankMath {
 		if ( '' === trim( $tpl ) ) {
 			return $description;
 		}
-		return wp_strip_all_tags( $this->tokens( $tpl, $combo ) );
+		// Encode for the <meta content="…"> attribute sink: brand/category names
+		// can contain quotes/ampersands (e.g. a brand named 25" Monitor).
+		return esc_html( wp_strip_all_tags( $this->tokens( $tpl, $combo ) ) );
 	}
 
 	/**

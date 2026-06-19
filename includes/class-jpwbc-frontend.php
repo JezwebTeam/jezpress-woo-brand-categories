@@ -148,10 +148,9 @@ class JPWBC_Frontend {
 			'jpwbc-frontend',
 			'jpwbcFront',
 			array(
-				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
-				'nonce'          => wp_create_nonce( 'jpwbc_front_nonce' ),
-				'reducedMotion'  => false,
-				'i18n'           => array(
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( 'jpwbc_front_nonce' ),
+				'i18n'    => array(
 					'loading' => __( 'Loading…', 'jezpress-woo-brand-categories' ),
 					'error'   => __( 'Could not load categories.', 'jezpress-woo-brand-categories' ),
 				),
@@ -313,7 +312,9 @@ class JPWBC_Frontend {
 	public function ajax_brand_categories(): void {
 		check_ajax_referer( 'jpwbc_front_nonce', 'nonce' );
 
-		if ( ! jpwbc_woocommerce_ready() ) {
+		// Lazy expansion only exists when other brands are clickable; otherwise
+		// the endpoint has no legitimate caller, so refuse it.
+		if ( empty( $this->settings['other_brands_clickable'] ) || ! jpwbc_woocommerce_ready() ) {
 			wp_send_json_error( array( 'message' => 'unavailable' ), 400 );
 		}
 
