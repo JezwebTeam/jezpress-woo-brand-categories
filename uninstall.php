@@ -22,6 +22,8 @@ global $wpdb;
  */
 $options = array(
 	'jpwbc_settings',
+	'jpwbc_cache_version',
+	'jpwbc_cache_rebuilt',
 	// Legacy keys from older builds (harmless if absent).
 	'jpwbc_license_key',
 	'jpwbc_license_data',

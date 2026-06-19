@@ -1,9 +1,11 @@
 === JezPress Woo Brand Categories ===
 Contributors: jezweb
-Tags: jezpress, wordpress
-Requires at least: 6.0
+Tags: woocommerce, product brand, brand archive, product categories, seo
+Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
+WC requires at least: 9.6
+WC tested up to: 10.8
 Stable tag: 1.0.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -12,30 +14,39 @@ In-brand product-category navigation and clean brand+category URLs for WooCommer
 
 == Description ==
 
-JezPress Woo Brand Categories is a WordPress plugin that adds an in-brand product-category dropdown and SEO-friendly clean URLs to WooCommerce brand archives.
+JezPress Woo Brand Categories adds an in-brand product-category dropdown and SEO-friendly clean URLs to WooCommerce brand archives.
+
+On a brand archive (for example `/brands/dmc/`), visitors can narrow the listing to a specific product category *within that brand* — for instance jumping from the DMC brand page straight to "DMC Pre Cut Fabrics" or "DMC Needles". The dropdown lists only the categories the brand actually has published products in, each with a live product count.
 
 = Features =
 
-* Feature 1
-* Feature 2
-* Feature 3
+* In-brand category dropdown rendered via shortcode `[jpwbc_brand_categories]`, an Elementor widget, or an automatic hook before the brand archive product loop.
+* Clean, indexable combo URLs: `/{brand-base}/{brand}/{category}/` (the brand base is taken from your live `product_brand` permalink).
+* Filtered archive: a combo URL shows only that brand's products in that category, respecting the existing ordering, pagination and catalog visibility.
+* Accurate per-category counts from a single grouped query — no heavy per-request product loading — cached and Redis-friendly.
+* Selective indexing: combos at or above a configurable product threshold are indexable with a self-canonical; thinner combos render but are set to `noindex,follow`; empty combos 404.
+* Rank Math integration: titles, meta descriptions, canonicals, breadcrumbs and the H1 for combo pages; legacy `?product_cat=` hits canonicalise to the clean URL.
+* Optional brand search box and lazy-loaded expansion of other brands' categories.
+* Combo Preview admin tab (per-brand categories, counts, generated URLs, indexing status) and a Cache tab with object-cache status and a one-click rebuild.
 
 = Requirements =
 
-* WordPress 6.0 or higher
+* WordPress 6.4 or higher
 * PHP 8.1 or higher
-* Valid JezPress license key
+* WooCommerce 9.6 or higher (native `product_brand` taxonomy)
+* A valid JezPress license key
 
 = JezPress Manager Integration =
 
-This plugin integrates with [JezPress Manager](https://github.com/abnercalapiz/jezpress-manager) for centralized license management and automatic updates.
+This plugin integrates with [JezPress Manager](https://github.com/JezwebTeam/jezpress-manager) for centralized license management and automatic updates.
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/jezpress-woo-brand-categories` directory, or install the plugin through the WordPress plugins screen.
+1. Upload the plugin files to `/wp-content/plugins/jezpress-woo-brand-categories`, or install through the WordPress plugins screen.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
-3. Navigate to JezPress Manager > JezPress Woo Brand Categories to configure the plugin.
-4. Enter your license key in the License tab to activate.
+3. Go to JezPress Manager > Brand Categories (or the top-level Brand Categories menu) and enter your license key in the License tab.
+4. On the Settings tab, choose how the dropdown is placed (shortcode, automatic, or Elementor widget) and configure the options.
+5. Drop the `[jpwbc_brand_categories]` shortcode or the "Brand Categories" Elementor widget into your brand archive sidebar. Re-save Permalinks once after enabling clean URLs.
 
 == Frequently Asked Questions ==
 
@@ -43,19 +54,34 @@ This plugin integrates with [JezPress Manager](https://github.com/abnercalapiz/j
 
 License keys are provided when you purchase the plugin from JezPress. Contact jez@jezweb.net if you need assistance.
 
-= Does this plugin work with the latest WordPress? =
+= Why is a brand+category page showing "noindex"? =
 
-Yes, this plugin is tested with the latest version of WordPress.
+Pages with fewer than the configured "Index threshold" number of products are intentionally set to `noindex,follow` to avoid thin/duplicate pages. Lower the threshold on the Indexing & SEO tab if you want more combos indexed.
+
+= Do the category links work without JavaScript? =
+
+Yes. Every category is a real link to a clean URL. JavaScript only adds expand/collapse, the brand search box and lazy loading of other brands.
+
+= Does it work with my theme / page builder? =
+
+The dropdown inherits your theme's styles. It ships with a shortcode, an Elementor widget and an automatic hook so it can be placed in most contexts, including Elementor Theme Builder archive templates.
 
 == Screenshots ==
 
-1. Settings page screenshot
-2. Another screenshot
+1. The in-brand category dropdown on a brand archive sidebar.
+2. The Settings tab.
+3. The Indexing & SEO tab.
+4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
 
 = 1.0.0 =
-* Initial release
+* Initial release.
+* In-brand category dropdown (shortcode, Elementor widget, automatic hook).
+* Clean, indexable `/{brand}/{category}/` combo URLs with selective indexing.
+* Cached grouped category query with per-category counts.
+* Rank Math SEO integration (titles, descriptions, canonicals, breadcrumbs, noindex for thin combos).
+* Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
 
