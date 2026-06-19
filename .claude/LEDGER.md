@@ -19,4 +19,5 @@
 ## Ledger
 | Version | Date | Audit | Shipped | JezPress | Dashboard |
 |---|---|---|---|---|---|
+| 1.0.1 | 2026-06-19 | clean | Hotfix: site-wide front-end fatal (canonical filter TypeError under strict_types) when Rank Math active; verified on staging site 186999 | uploaded | patched |
 | 1.0.0 | 2026-06-19 | fixes (1 H) | Initial release: in-brand category dropdown + clean /brands/{brand}/{category}/ URLs + Rank Math SEO for WooCommerce brand archives | uploaded | patched |
