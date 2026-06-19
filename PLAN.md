@@ -15,6 +15,18 @@
 
 ---
 
+## Build status (resumable)
+
+- [x] **Phase 1 — Scaffold** (audit: clean). Bootstrap, HPOS, WC+product_brand guard, constants, CLAUDE.md, LEDGER.
+- [x] **Phase 2 — Settings + admin** (audit: PASS). Single `jpwbc_settings` option, per-tab sanitiser, tabs.
+- [x] **Phase 3 — Core feature** (audit: PASS, 1 High fixed). Cache, Query, Rewrites, Frontend + templates + JS/CSS, Rank Math SEO, Elementor widget, Admin Combo Preview + Cache tabs.
+- [x] **Phase 4 — Licence + Updater** (templated; URL-query-param contract confirmed in Phase 1 audit). Live `curl` test deferred to post-upload (Phase 6).
+- [x] **Phase 5 — Release infra** (audit: PASS). `release.yml`, `readme.txt`, `uninstall.php`.
+- [ ] **Phase 6 — First release 1.0.0** — NEEDS: GitHub repo under JezwebTeam + user greenlight (deliberate ship act), then pre-release audit → tag → push → JezPress upload → dashboard tab patches → live updater curl → LEDGER → Google Chat.
+- [ ] **Phase 7 — First deployment** to birchcreative.com.au (site 7554); replace the Elementor Sitemap widget in template 3529.
+
+---
+
 ## 1. What the client wants
 
 On a brand archive (e.g. `/brands/dmc/`) the visitor should be able to narrow to a
