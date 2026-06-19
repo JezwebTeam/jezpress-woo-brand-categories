@@ -1,0 +1,131 @@
+/**
+ * JezPress Woo Brand Categories Admin Styles
+ *
+ * @package JezPress\WooBrandCategories
+ * @since   1.0.0
+ */
+
+/* Card styles */
+.jpwbc-card {
+	background: #fff;
+	padding: 20px;
+	border: 1px solid #c3c4c7;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	margin-bottom: 20px;
+}
+
+.jpwbc-card h2 {
+	margin-top: 0;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
+}
+
+/* Badge styles */
+.jpwbc-badge {
+	display: inline-block;
+	padding: 3px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	margin-left: 10px;
+	vertical-align: middle;
+}
+
+.jpwbc-badge-active {
+	background: #00a32a;
+	color: #fff;
+}
+
+.jpwbc-badge-inactive {
+	background: #d63638;
+	color: #fff;
+}
+
+.jpwbc-badge-expired {
+	background: #dba617;
+	color: #fff;
+}
+
+/* Form styles */
+.jpwbc-settings-form .form-table th {
+	width: 200px;
+}
+
+.jpwbc-settings-form .form-table td {
+	padding: 15px 10px;
+}
+
+/* License info styles */
+.jpwbc-license-info p {
+	margin: 8px 0;
+}
+
+.jpwbc-license-info strong {
+	display: inline-block;
+	min-width: 120px;
+}
+
+/* Notice styles */
+.jpwbc-notice {
+	padding: 10px 15px;
+	margin: 15px 0;
+	border-left: 4px solid #72aee6;
+	background: #f0f6fc;
+}
+
+.jpwbc-notice-success {
+	border-left-color: #00a32a;
+	background: #f0f9f0;
+}
+
+.jpwbc-notice-error {
+	border-left-color: #d63638;
+	background: #fcf0f0;
+}
+
+.jpwbc-notice-warning {
+	border-left-color: #dba617;
+	background: #fcf9e8;
+}
+
+/* Loading spinner */
+.jpwbc-spinner {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	border: 3px solid #f3f3f3;
+	border-top: 3px solid #0073aa;
+	border-radius: 50%;
+	animation: jpwbc-spin 1s linear infinite;
+	vertical-align: middle;
+	margin-left: 10px;
+}
+
+@keyframes jpwbc-spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+/* Button styles */
+.jpwbc-button-group {
+	margin-top: 15px;
+}
+
+.jpwbc-button-group .button {
+	margin-right: 10px;
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+	.jpwbc-settings-form .form-table th {
+		width: 100%;
+		display: block;
+		padding-bottom: 5px;
+	}
+
+	.jpwbc-license-info strong {
+		display: block;
+		margin-bottom: 3px;
+	}
+}

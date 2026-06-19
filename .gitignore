@@ -1,0 +1,33 @@
+# Claude Code — commit the reusable .claude/ bundle (standards, agents, settings.json).
+# Ignore ONLY the machine-local permission cache.
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Build artifacts
+*.zip
+*.tar.gz
+
+# Dependencies
+node_modules/
+vendor/
+
+# Logs
+*.log
+
+# Local notes / scratch
+test prompt.txt
+.env
+.env.local
+
+# Note: PLAN.md and .claude/LEDGER.md ARE committed (team-visible / resumable
+# build state and the append-only release ledger). Both are excluded from the
+# release ZIP at build time (release.yml), not from git.
