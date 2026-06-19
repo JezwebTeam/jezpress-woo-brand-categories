@@ -19,4 +19,4 @@
 ## Ledger
 | Version | Date | Audit | Shipped | JezPress | Dashboard |
 |---|---|---|---|---|---|
-| _(none yet)_ | | | | | |
+| 1.0.0 | 2026-06-19 | fixes (1 H) | Initial release: in-brand category dropdown + clean /brands/{brand}/{category}/ URLs + Rank Math SEO for WooCommerce brand archives | uploaded | patched |
