@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.0.1 =
+* Fix: a fatal error (TypeError) on every front-end page when Rank Math is active, caused by the canonical filter receiving a non-string value. The plugin no longer assumes Rank Math passes a string canonical.
+
 = 1.0.0 =
 * Initial release.
 * In-brand category dropdown (shortcode, Elementor widget, automatic hook).
@@ -84,6 +87,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.0.1 =
+Critical fix: resolves a site-wide fatal error on front-end pages when Rank Math is active. Upgrade immediately.
 
 = 1.0.0 =
 Initial release.

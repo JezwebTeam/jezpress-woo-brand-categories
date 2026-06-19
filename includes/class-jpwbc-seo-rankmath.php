@@ -199,8 +199,13 @@ class JPWBC_SEO_RankMath {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $canonical Current canonical URL.
-	 * @return string
+	 * Rank Math passes its current canonical value, which may be a string OR
+	 * boolean false (its "not set yet" default) — so this param is intentionally
+	 * untyped. We only ever override with our own URL; otherwise we return the
+	 * value Rank Math gave us, untouched, preserving its false semantics.
+	 *
+	 * @param mixed $canonical Current canonical value (string|false).
+	 * @return mixed
 	 */
 	public function filter_canonical( $canonical ) {
 		$combo = $this->combo();
@@ -208,35 +213,36 @@ class JPWBC_SEO_RankMath {
 			return $this->rewrites->combo_url( $combo['brand']->slug, (string) $combo['cat']['slug'] );
 		}
 
-		return $this->legacy_param_canonical( $canonical );
+		$legacy = $this->legacy_param_canonical();
+
+		return null !== $legacy ? $legacy : $canonical;
 	}
 
 	/**
-	 * Canonicalise legacy "?product_cat=" hits on a brand archive.
+	 * Clean-URL canonical for legacy "?product_cat=" hits on a brand archive.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $canonical Current canonical URL.
-	 * @return string
+	 * @return string|null The clean combo URL, or null when no override applies.
 	 */
-	private function legacy_param_canonical( string $canonical ): string {
+	private function legacy_param_canonical(): ?string {
 		if ( empty( $this->settings['clean_urls'] ) || ! jpwbc_woocommerce_ready() || ! is_tax( JPWBC_BRAND_TAXONOMY ) ) {
-			return $canonical;
+			return null;
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only canonicalisation of a public GET param.
 		$param = isset( $_GET['product_cat'] ) ? sanitize_title( wp_unslash( (string) $_GET['product_cat'] ) ) : '';
 		if ( '' === $param ) {
-			return $canonical;
+			return null;
 		}
 
 		$obj = get_queried_object();
 		if ( ! $obj instanceof \WP_Term || JPWBC_BRAND_TAXONOMY !== $obj->taxonomy ) {
-			return $canonical;
+			return null;
 		}
 
 		if ( $this->query->get_combo_count( (int) $obj->term_id, $param ) < 1 ) {
-			return $canonical;
+			return null;
 		}
 
 		return $this->rewrites->combo_url( $obj->slug, $param );

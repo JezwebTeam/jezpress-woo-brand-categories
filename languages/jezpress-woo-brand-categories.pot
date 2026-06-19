@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: JezPress Woo Brand Categories 1.0.0\n"
+"Project-Id-Version: JezPress Woo Brand Categories 1.0.1\n"
 "Report-Msgid-Bugs-To: https://jezpress.com\n"
 "POT-Creation-Date: 2024-01-01 00:00:00+00:00\n"
 "MIME-Version: 1.0\n"
