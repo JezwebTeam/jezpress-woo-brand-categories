@@ -189,9 +189,9 @@ class JPWBC_SEO_RankMath {
 		if ( '' === trim( $tpl ) ) {
 			return $description;
 		}
-		// Encode for the <meta content="…"> attribute sink: brand/category names
-		// can contain quotes/ampersands (e.g. a brand named 25" Monitor).
-		return esc_html( wp_strip_all_tags( $this->tokens( $tpl, $combo ) ) );
+		// Return plain text: Rank Math is the sole consumer of this filter and
+		// escapes the <meta> attribute itself, so escaping here would double-encode.
+		return wp_strip_all_tags( $this->tokens( $tpl, $combo ) );
 	}
 
 	/**
@@ -308,7 +308,7 @@ class JPWBC_SEO_RankMath {
 	 */
 	public function render_intro(): void {
 		$combo = $this->combo();
-		if ( null === $combo ) {
+		if ( null === $combo || empty( $combo['indexable'] ) ) {
 			return;
 		}
 		$tpl = (string) ( $this->settings['intro_template'] ?? '' );
