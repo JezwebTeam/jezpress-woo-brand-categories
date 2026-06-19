@@ -289,18 +289,23 @@ class JPWBC_Admin {
 			}
 		}
 
+		$output = $this->strip_internal_keys( $output );
+
 		/**
 		 * Fires after settings are sanitised, before they are stored.
 		 *
 		 * Feature classes hook this to flush rewrite rules / bust caches.
+		 * The payload is the final settings array (without internal keys), but
+		 * the option is not written yet — consumers should use this argument,
+		 * not JPWBC_Admin::get_settings(), which still returns the old value.
 		 *
 		 * @since 1.0.0
 		 *
-		 * @param array<string, mixed> $output Sanitised settings.
+		 * @param array<string, mixed> $output Sanitised settings to be stored.
 		 */
 		do_action( 'jpwbc_settings_saved', $output );
 
-		return $this->strip_internal_keys( $output );
+		return $output;
 	}
 
 	/**
@@ -472,7 +477,7 @@ class JPWBC_Admin {
 			do_action( $action );
 			return;
 		}
-		echo '<p>' . esc_html__( 'This section becomes available once WooCommerce and the product_brand taxonomy are active.', 'jezpress-woo-brand-categories' ) . '</p>';
+		echo '<p>' . esc_html__( 'This section becomes available once the plugin is fully active (WooCommerce with the product_brand taxonomy).', 'jezpress-woo-brand-categories' ) . '</p>';
 	}
 
 	/**
