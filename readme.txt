@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.0.6
+Stable tag: 1.1.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,7 @@ On a brand archive (for example `/brands/dmc/`), visitors can narrow the listing
 * Rank Math integration: titles, meta descriptions, canonicals, breadcrumbs and the H1 for combo pages; legacy `?product_cat=` hits canonicalise to the clean URL.
 * Optional brand search box; every brand in the list is expandable to reveal its categories inline (lazy-loaded).
 * Combo Preview admin tab (per-brand categories, counts, generated URLs, indexing status) and a Cache tab with object-cache status and a one-click rebuild.
+* Style tab with colour pickers (active/highlight, toggle chevron, hover accent) — no CSS editing required.
 
 = Requirements =
 
@@ -75,6 +76,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.1.0 =
+* New: a "Style" tab with colour pickers for the active/highlight colour, the toggle chevron, and the hover accent. Colours are applied on the front end as CSS variables, so you can match your theme without editing any CSS.
+
 = 1.0.6 =
 * Fix: the brand expand/collapse toggle button no longer inherits theme padding or borders, so the chevron stays correctly sized and aligned across themes.
 
@@ -103,6 +107,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Adds a Style tab to control the dropdown colours from the admin (no CSS editing).
 
 = 1.0.6 =
 Minor CSS fix so the brand toggle button isn't restyled by the theme.

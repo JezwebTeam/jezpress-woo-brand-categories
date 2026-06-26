@@ -136,6 +136,23 @@ class JPWBC_Frontend {
 			JPWBC_VERSION
 		);
 
+		// Apply the admin-chosen colours as CSS custom properties (overriding the
+		// defaults in jpwbc.css). Values are pre-validated hex via get_settings().
+		$active = sanitize_hex_color( (string) ( $this->settings['color_active'] ?? '' ) );
+		$light  = sanitize_hex_color( (string) ( $this->settings['color_active_light'] ?? '' ) );
+		$accent = sanitize_hex_color( (string) ( $this->settings['color_accent'] ?? '' ) );
+		if ( $active && $light && $accent ) {
+			wp_add_inline_style(
+				'jpwbc-frontend',
+				sprintf(
+					'.jpwbc-brand-cats{--jpwbc-pink:%s;--jpwbc-pink-light:%s;--jpwbc-teal:%s;}',
+					$active,
+					$light,
+					$accent
+				)
+			);
+		}
+
 		wp_enqueue_script(
 			'jpwbc-frontend',
 			JPWBC_PLUGIN_URL . 'assets/js/jpwbc.js',

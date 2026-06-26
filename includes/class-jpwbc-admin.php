@@ -54,6 +54,7 @@ class JPWBC_Admin {
 	 */
 	private const TAB_KEYS = array(
 		'general' => array( 'enabled', 'placement', 'expand_active', 'show_counts', 'brand_search' ),
+		'style'   => array( 'color_active', 'color_active_light', 'color_accent' ),
 		'seo'     => array( 'clean_urls', 'index_min_products', 'title_template', 'intro_template' ),
 	);
 
@@ -70,6 +71,10 @@ class JPWBC_Admin {
 		'expand_active'          => true,
 		'show_counts'            => true,
 		'brand_search'           => true,
+		// Appearance (output as CSS custom properties on .jpwbc-brand-cats).
+		'color_active'           => '#9c5468',
+		'color_active_light'     => '#c98a9b',
+		'color_accent'           => '#14b8a6',
 		// Indexing & SEO.
 		'clean_urls'             => true,
 		'index_min_products'     => 4,
@@ -113,8 +118,26 @@ class JPWBC_Admin {
 		$merged['placement']              = in_array( $merged['placement'], self::PLACEMENTS, true ) ? $merged['placement'] : 'shortcode';
 		$merged['title_template']         = (string) $merged['title_template'];
 		$merged['intro_template']         = (string) $merged['intro_template'];
+		$merged['color_active']           = self::sanitize_color( $merged['color_active'], self::DEFAULT_SETTINGS['color_active'] );
+		$merged['color_active_light']     = self::sanitize_color( $merged['color_active_light'], self::DEFAULT_SETTINGS['color_active_light'] );
+		$merged['color_accent']           = self::sanitize_color( $merged['color_accent'], self::DEFAULT_SETTINGS['color_accent'] );
 
 		return $merged;
+	}
+
+	/**
+	 * Validate a hex colour, falling back to a default when invalid/empty.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param mixed  $value   Candidate colour.
+	 * @param string $default Fallback colour (a known-valid hex).
+	 * @return string
+	 */
+	private static function sanitize_color( $value, string $default ): string {
+		$value = is_string( $value ) ? trim( $value ) : '';
+		$clean = sanitize_hex_color( $value );
+		return $clean ? $clean : $default;
 	}
 
 	/**
@@ -195,6 +218,18 @@ class JPWBC_Admin {
 		$this->add_checkbox_field( 'expand_active', __( 'Expand current brand by default', 'jezpress-woo-brand-categories' ), 'jpwbc-settings-general', 'jpwbc_section_general', __( 'On a brand archive, open the active brand and show its categories.', 'jezpress-woo-brand-categories' ) );
 		$this->add_checkbox_field( 'show_counts', __( 'Show product counts', 'jezpress-woo-brand-categories' ), 'jpwbc-settings-general', 'jpwbc_section_general', __( 'Display the product count next to each category.', 'jezpress-woo-brand-categories' ) );
 		$this->add_checkbox_field( 'brand_search', __( 'Show brand search box', 'jezpress-woo-brand-categories' ), 'jpwbc-settings-general', 'jpwbc_section_general', __( 'Add a small filter box above the brand list.', 'jezpress-woo-brand-categories' ) );
+
+		// --- Style tab ----------------------------------------------------
+		add_settings_section(
+			'jpwbc_section_style',
+			__( 'Colours', 'jezpress-woo-brand-categories' ),
+			array( $this, 'render_style_section_intro' ),
+			'jpwbc-settings-style'
+		);
+
+		$this->add_color_field( 'color_active', __( 'Active / highlight colour', 'jezpress-woo-brand-categories' ), 'jpwbc-settings-style', 'jpwbc_section_style', __( 'Active brand &amp; category text, and the active category bar.', 'jezpress-woo-brand-categories' ) );
+		$this->add_color_field( 'color_active_light', __( 'Toggle (chevron) colour', 'jezpress-woo-brand-categories' ), 'jpwbc-settings-style', 'jpwbc_section_style', __( 'The expand/collapse chevron next to each brand.', 'jezpress-woo-brand-categories' ) );
+		$this->add_color_field( 'color_accent', __( 'Accent colour', 'jezpress-woo-brand-categories' ), 'jpwbc-settings-style', 'jpwbc_section_style', __( 'Hover indicator on the left of each category.', 'jezpress-woo-brand-categories' ) );
 
 		// --- Indexing & SEO tab -------------------------------------------
 		add_settings_section(
@@ -283,6 +318,11 @@ class JPWBC_Admin {
 			case 'index_min_products':
 				return max( 1, min( 999, absint( $input[ $key ] ?? 4 ) ) );
 
+			case 'color_active':
+			case 'color_active_light':
+			case 'color_accent':
+				return self::sanitize_color( $input[ $key ] ?? '', self::DEFAULT_SETTINGS[ $key ] );
+
 			case 'title_template':
 				return sanitize_text_field( (string) ( $input[ $key ] ?? '' ) );
 
@@ -346,6 +386,7 @@ class JPWBC_Admin {
 
 		$tabs = array(
 			'general' => __( 'Settings', 'jezpress-woo-brand-categories' ),
+			'style'   => __( 'Style', 'jezpress-woo-brand-categories' ),
 			'seo'     => __( 'Indexing & SEO', 'jezpress-woo-brand-categories' ),
 			'preview' => __( 'Combo Preview', 'jezpress-woo-brand-categories' ),
 			'cache'   => __( 'Cache', 'jezpress-woo-brand-categories' ),
@@ -387,6 +428,9 @@ class JPWBC_Admin {
 			<div class="tab-content" style="margin-top:20px;">
 				<?php
 				switch ( $current_tab ) {
+					case 'style':
+						$this->render_settings_form( 'style', 'jpwbc-settings-style' );
+						break;
 					case 'seo':
 						$this->render_settings_form( 'seo', 'jpwbc-settings-seo' );
 						break;
@@ -553,12 +597,57 @@ class JPWBC_Admin {
 	}
 
 	/**
+	 * Style section intro.
+	 *
+	 * @since 1.1.0
+	 */
+	public function render_style_section_intro(): void {
+		echo '<p>' . esc_html__( 'Set the dropdown colours. These apply on the front end without touching any CSS.', 'jezpress-woo-brand-categories' ) . '</p>';
+	}
+
+	/**
 	 * SEO section intro.
 	 *
 	 * @since 1.0.0
 	 */
 	public function render_seo_section_intro(): void {
 		echo '<p>' . esc_html__( 'Tune the clean combo URLs and which brand+category pages are allowed to be indexed.', 'jezpress-woo-brand-categories' ) . '</p>';
+	}
+
+	/**
+	 * Register a hex-colour field bound to a settings key.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string $key         Settings key.
+	 * @param string $label       Field label.
+	 * @param string $page_slug   Settings page slug.
+	 * @param string $section     Section id.
+	 * @param string $description Help text (may contain limited inline HTML).
+	 */
+	private function add_color_field( string $key, string $label, string $page_slug, string $section, string $description = '' ): void {
+		add_settings_field(
+			$key,
+			$label,
+			function () use ( $key, $description ): void {
+				$settings = self::get_settings();
+				$value    = (string) $settings[ $key ];
+				printf(
+					'<input type="color" name="%1$s[%2$s]" value="%3$s" style="width:60px;height:32px;vertical-align:middle;padding:0;"> <code>%4$s</code>',
+					esc_attr( self::OPTION_KEY ),
+					esc_attr( $key ),
+					esc_attr( $value ),
+					esc_html( $value )
+				);
+				if ( '' !== $description ) {
+					echo '<span class="description" style="display:block;margin-top:4px;">'
+						. wp_kses( $description, array( 'code' => array() ) )
+						. '</span>';
+				}
+			},
+			$page_slug,
+			$section
+		);
 	}
 
 	/**
