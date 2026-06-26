@@ -53,7 +53,7 @@ class JPWBC_Admin {
 	 * @var array<string, array<int, string>>
 	 */
 	private const TAB_KEYS = array(
-		'general' => array( 'enabled', 'placement', 'expand_active', 'other_brands_clickable', 'show_counts', 'brand_search' ),
+		'general' => array( 'enabled', 'placement', 'expand_active', 'show_counts', 'brand_search' ),
 		'seo'     => array( 'clean_urls', 'index_min_products', 'title_template', 'intro_template' ),
 	);
 
@@ -68,7 +68,6 @@ class JPWBC_Admin {
 		'enabled'                => true,
 		'placement'              => 'shortcode',
 		'expand_active'          => true,
-		'other_brands_clickable' => true,
 		'show_counts'            => true,
 		'brand_search'           => true,
 		// Indexing & SEO.
@@ -107,7 +106,6 @@ class JPWBC_Admin {
 		// Coerce types defensively.
 		$merged['enabled']                = (bool) $merged['enabled'];
 		$merged['expand_active']          = (bool) $merged['expand_active'];
-		$merged['other_brands_clickable'] = (bool) $merged['other_brands_clickable'];
 		$merged['show_counts']            = (bool) $merged['show_counts'];
 		$merged['brand_search']           = (bool) $merged['brand_search'];
 		$merged['clean_urls']             = (bool) $merged['clean_urls'];
@@ -195,7 +193,6 @@ class JPWBC_Admin {
 		);
 
 		$this->add_checkbox_field( 'expand_active', __( 'Expand current brand by default', 'jezpress-woo-brand-categories' ), 'jpwbc-settings-general', 'jpwbc_section_general', __( 'On a brand archive, open the active brand and show its categories.', 'jezpress-woo-brand-categories' ) );
-		$this->add_checkbox_field( 'other_brands_clickable', __( 'Other brands clickable', 'jezpress-woo-brand-categories' ), 'jpwbc-settings-general', 'jpwbc_section_general', __( 'Allow expanding any brand in the list to reveal its categories inline.', 'jezpress-woo-brand-categories' ) );
 		$this->add_checkbox_field( 'show_counts', __( 'Show product counts', 'jezpress-woo-brand-categories' ), 'jpwbc-settings-general', 'jpwbc_section_general', __( 'Display the product count next to each category.', 'jezpress-woo-brand-categories' ) );
 		$this->add_checkbox_field( 'brand_search', __( 'Show brand search box', 'jezpress-woo-brand-categories' ), 'jpwbc-settings-general', 'jpwbc_section_general', __( 'Add a small filter box above the brand list.', 'jezpress-woo-brand-categories' ) );
 

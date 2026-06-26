@@ -303,7 +303,7 @@ class JPWBC_Frontend {
 	}
 
 	/**
-	 * AJAX: return a brand's category list as HTML (lazy other-brand expansion).
+	 * AJAX: return a brand's category list as HTML (lazy-loaded when a brand is expanded).
 	 *
 	 * Public, read-only endpoint — no capability required, but nonce-checked.
 	 *
@@ -312,9 +312,7 @@ class JPWBC_Frontend {
 	public function ajax_brand_categories(): void {
 		check_ajax_referer( 'jpwbc_front_nonce', 'nonce' );
 
-		// Lazy expansion only exists when other brands are clickable; otherwise
-		// the endpoint has no legitimate caller, so refuse it.
-		if ( empty( $this->settings['other_brands_clickable'] ) || ! jpwbc_woocommerce_ready() ) {
+		if ( ! jpwbc_woocommerce_ready() ) {
 			wp_send_json_error( array( 'message' => 'unavailable' ), 400 );
 		}
 

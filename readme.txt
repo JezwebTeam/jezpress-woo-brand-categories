@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,7 +26,7 @@ On a brand archive (for example `/brands/dmc/`), visitors can narrow the listing
 * Accurate per-category counts from a single grouped query — no heavy per-request product loading — cached and Redis-friendly.
 * Selective indexing: combos at or above a configurable product threshold are indexable with a self-canonical; thinner combos render but are set to `noindex,follow`; empty combos 404.
 * Rank Math integration: titles, meta descriptions, canonicals, breadcrumbs and the H1 for combo pages; legacy `?product_cat=` hits canonicalise to the clean URL.
-* Optional brand search box and lazy-loaded expansion of other brands' categories.
+* Optional brand search box; every brand in the list is expandable to reveal its categories inline (lazy-loaded).
 * Combo Preview admin tab (per-brand categories, counts, generated URLs, indexing status) and a Cache tab with object-cache status and a one-click rebuild.
 
 = Requirements =
@@ -75,6 +75,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.0.5 =
+* Change: every brand in the list is now expandable by default. The "Other brands clickable" toggle has been removed — it is built-in behaviour, so there is nothing to configure.
+
 = 1.0.4 =
 * Fix: the real cause of settings not saving — the sanitiser merged per-tab and could run more than once per save, and the second pass reverted the change. The merge now happens once in the save handler and the sanitiser is pure/idempotent, so saves always persist.
 * Change: "Other brands clickable" now defaults to on, so every brand in the list is expandable out of the box.
@@ -97,6 +100,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.0.5 =
+All brands are now expandable by default; the "Other brands clickable" setting is removed (no longer needed).
 
 = 1.0.4 =
 Fixes the underlying settings-save bug (non-idempotent sanitiser reverting the save) and makes all brands clickable by default.

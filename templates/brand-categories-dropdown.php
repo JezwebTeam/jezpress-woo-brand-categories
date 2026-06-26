@@ -3,8 +3,8 @@
  * Template: the "Our Brands" sidebar with the in-brand category dropdown.
  *
  * Renders the full A-Z brand list; the current brand is expanded inline with
- * its categories. When "other brands clickable" is enabled, other brands get a
- * toggle that lazy-loads their categories over AJAX (see assets/js/jpwbc.js).
+ * its categories, and every other brand gets a toggle that lazy-loads its
+ * categories over AJAX (built-in as of 1.0.5; see assets/js/jpwbc.js).
  *
  * Override by copying to {theme}/jezpress-woo-brand-categories/brand-categories-dropdown.php
  *
@@ -31,7 +31,7 @@ $jpwbc_brands    = isset( $data['brands'] ) && is_array( $data['brands'] ) ? $da
 $jpwbc_current   = isset( $data['current_brand'] ) && is_array( $data['current_brand'] ) ? $data['current_brand'] : null;
 $jpwbc_cats      = isset( $data['categories'] ) && is_array( $data['categories'] ) ? $data['categories'] : array();
 $jpwbc_active    = isset( $data['active_cat_slug'] ) ? (string) $data['active_cat_slug'] : '';
-$jpwbc_clickable = ! empty( $jpwbc_settings['other_brands_clickable'] );
+$jpwbc_clickable = true; // All brands are expandable (built-in behaviour as of 1.0.5).
 $jpwbc_expand    = ! empty( $jpwbc_settings['expand_active'] );
 $jpwbc_search    = ! empty( $jpwbc_settings['brand_search'] );
 
