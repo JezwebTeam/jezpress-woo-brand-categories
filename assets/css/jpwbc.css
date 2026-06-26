@@ -70,8 +70,8 @@
 	justify-content: center;
 	width: 2em;
 	height: 2em;
-	padding: 0;
-	border: 0;
+	padding: 0 !important;
+	border: 0 !important;
 	background: transparent;
 	cursor: pointer;
 	color: var(--jpwbc-pink-light);

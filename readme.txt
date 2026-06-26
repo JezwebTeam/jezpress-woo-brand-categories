@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.0.6 =
+* Fix: the brand expand/collapse toggle button no longer inherits theme padding or borders, so the chevron stays correctly sized and aligned across themes.
+
 = 1.0.5 =
 * Change: every brand in the list is now expandable by default. The "Other brands clickable" toggle has been removed — it is built-in behaviour, so there is nothing to configure.
 
@@ -100,6 +103,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.0.6 =
+Minor CSS fix so the brand toggle button isn't restyled by the theme.
 
 = 1.0.5 =
 All brands are now expandable by default; the "Other brands clickable" setting is removed (no longer needed).

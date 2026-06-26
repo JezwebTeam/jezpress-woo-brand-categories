@@ -3,7 +3,7 @@
  * Plugin Name: JezPress Woo Brand Categories
  * Plugin URI: https://jezpress.com/plugins/jezpress-woo-brand-categories
  * Description: In-brand product-category navigation and clean brand+category URLs for WooCommerce brand archives.
- * Version: 1.0.5
+ * Version: 1.0.6
  * Author: Jezweb
  * Author URI: https://jezpress.com
  * License: GPL-2.0+
@@ -76,7 +76,7 @@ if ( version_compare( PHP_VERSION, '8.1.0', '<' ) ) {
  *
  * @since 1.0.0
  */
-define( 'JPWBC_VERSION', '1.0.5' );
+define( 'JPWBC_VERSION', '1.0.6' );
 define( 'JPWBC_PLUGIN_FILE', __FILE__ );
 define( 'JPWBC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JPWBC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
