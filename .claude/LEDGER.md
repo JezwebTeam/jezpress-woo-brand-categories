@@ -19,6 +19,7 @@
 ## Ledger
 | Version | Date | Audit | Shipped | JezPress | Dashboard |
 |---|---|---|---|---|---|
+| 1.1.0 | 2026-06-26 | clean | New Style tab: colour pickers (active/chevron/accent) output as CSS variables; hex-validated, idempotent save preserved. CI upload step reported success but did NOT register the version — caught by verifying the server, uploaded manually with --ver. Deployed to staging 186999 | uploaded | patched |
 | 1.0.6 | 2026-06-26 | manual | Cosmetic CSS: brand toggle button ignores theme padding/border (!important); light diff-review only (no agent, per audit-guide cosmetic exception); deployed to staging 186999 | uploaded | patched |
 | 1.0.5 | 2026-06-26 | clean | Remove "Other brands clickable" toggle; all brands expandable by default (built-in); deployed + verified on staging 186999 | uploaded | patched |
 | 1.0.4 | 2026-06-26 | clean | REAL settings-save fix: non-idempotent per-tab sanitiser early-returned on its 2nd pass and reverted saves (latent since 1.0.0). Merge moved to handler, sanitiser made idempotent; root cause proven via live POST/sanitise capture on staging 186999; save persistence verified | uploaded | patched |
