@@ -68,7 +68,7 @@ class JPWBC_Admin {
 		'enabled'                => true,
 		'placement'              => 'shortcode',
 		'expand_active'          => true,
-		'other_brands_clickable' => false,
+		'other_brands_clickable' => true,
 		'show_counts'            => true,
 		'brand_search'           => true,
 		// Indexing & SEO.
@@ -235,90 +235,66 @@ class JPWBC_Admin {
 	}
 
 	/**
-	 * Sanitise the settings option.
+	 * Sanitise the full settings option — pure and idempotent.
 	 *
-	 * Only the keys belonging to the submitted tab (`active_tab`) are taken
-	 * from the input; every other key is preserved from the stored option so a
-	 * single-tab save never wipes the other tab's values. Unchecked checkboxes
-	 * (absent from POST) are correctly stored as false for the active tab only.
+	 * This is the registered `sanitize_option_jpwbc_settings` callback. It takes
+	 * a complete settings array and type-coerces every known key, ignoring any
+	 * unknown keys. It does NOT merge, does NOT consult the stored option, and
+	 * NEVER early-returns — so it is safe to run any number of times (the save
+	 * handler builds the complete, merged array and this only normalises it).
+	 *
+	 * Earlier versions merged a single tab's keys here and early-returned when
+	 * the active tab was absent; because the sanitiser runs more than once on
+	 * some stacks, the second (tab-less) pass reverted the save. Moving the
+	 * merge into the handler and making this idempotent fixes that.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param mixed $input Raw submitted value.
+	 * @param mixed $input Settings array to normalise.
 	 * @return array<string, mixed> Sanitised, complete settings array.
 	 */
 	public function sanitize_settings( mixed $input ): array {
 		$input  = is_array( $input ) ? $input : array();
-		$output = self::get_settings(); // Start from current, fully-defaulted values.
+		$output = array();
 
-		$active_tab = isset( $input['active_tab'] ) ? sanitize_key( (string) $input['active_tab'] ) : '';
-		$keys       = self::TAB_KEYS[ $active_tab ] ?? array();
-
-		if ( empty( $keys ) ) {
-			// Unknown tab — change nothing.
-			return $this->strip_internal_keys( $output );
-		}
-
-		foreach ( $keys as $key ) {
-			switch ( $key ) {
-				case 'enabled':
-				case 'expand_active':
-				case 'other_brands_clickable':
-				case 'show_counts':
-				case 'brand_search':
-				case 'clean_urls':
-					$output[ $key ] = ! empty( $input[ $key ] );
-					break;
-
-				case 'placement':
-					$value          = isset( $input[ $key ] ) ? sanitize_key( (string) $input[ $key ] ) : 'shortcode';
-					$output[ $key ] = in_array( $value, self::PLACEMENTS, true ) ? $value : 'shortcode';
-					break;
-
-				case 'index_min_products':
-					$output[ $key ] = max( 1, min( 999, absint( $input[ $key ] ?? 4 ) ) );
-					break;
-
-				case 'title_template':
-					$output[ $key ] = sanitize_text_field( (string) ( $input[ $key ] ?? '' ) );
-					break;
-
-				case 'intro_template':
-					$output[ $key ] = sanitize_textarea_field( (string) ( $input[ $key ] ?? '' ) );
-					break;
+		foreach ( array_keys( self::DEFAULT_SETTINGS ) as $key ) {
+			if ( array_key_exists( $key, $input ) ) {
+				$output[ $key ] = $this->sanitize_value( $key, $input );
+			} else {
+				$output[ $key ] = self::DEFAULT_SETTINGS[ $key ];
 			}
 		}
-
-		$output = $this->strip_internal_keys( $output );
-
-		/**
-		 * Fires after settings are sanitised, before they are stored.
-		 *
-		 * Feature classes hook this to flush rewrite rules / bust caches.
-		 * The payload is the final settings array (without internal keys), but
-		 * the option is not written yet — consumers should use this argument,
-		 * not JPWBC_Admin::get_settings(), which still returns the old value.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param array<string, mixed> $output Sanitised settings to be stored.
-		 */
-		do_action( 'jpwbc_settings_saved', $output );
 
 		return $output;
 	}
 
 	/**
-	 * Remove transient internal keys before persisting.
+	 * Sanitise a single settings value by key.
 	 *
-	 * @since 1.0.0
+	 * @since 1.0.4
 	 *
-	 * @param array<string, mixed> $settings Settings array.
-	 * @return array<string, mixed>
+	 * @param string               $key   Settings key.
+	 * @param array<string, mixed> $input Source array (POST or stored values).
+	 * @return mixed Sanitised value for that key.
 	 */
-	private function strip_internal_keys( array $settings ): array {
-		unset( $settings['active_tab'], $settings['_active_tab'] );
-		return $settings;
+	private function sanitize_value( string $key, array $input ): mixed {
+		switch ( $key ) {
+			case 'placement':
+				$value = isset( $input[ $key ] ) ? sanitize_key( (string) $input[ $key ] ) : 'shortcode';
+				return in_array( $value, self::PLACEMENTS, true ) ? $value : 'shortcode';
+
+			case 'index_min_products':
+				return max( 1, min( 999, absint( $input[ $key ] ?? 4 ) ) );
+
+			case 'title_template':
+				return sanitize_text_field( (string) ( $input[ $key ] ?? '' ) );
+
+			case 'intro_template':
+				return sanitize_textarea_field( (string) ( $input[ $key ] ?? '' ) );
+
+			default: // All boolean toggles.
+				return ! empty( $input[ $key ] );
+		}
 	}
 
 	/**
@@ -439,9 +415,8 @@ class JPWBC_Admin {
 	/**
 	 * Render a Settings-API form for one tab.
 	 *
-	 * The top-level `jpwbc_tab` field tells the handler (and in turn the
-	 * sanitiser, via the injected `active_tab` key) which keys this submit
-	 * is allowed to change.
+	 * The top-level `jpwbc_tab` field tells the save handler which tab's keys
+	 * this submit is allowed to change (the merge happens there, once).
 	 *
 	 * @since 1.0.0
 	 *
@@ -486,23 +461,38 @@ class JPWBC_Admin {
 
 		check_admin_referer( 'jpwbc_save_settings', 'jpwbc_settings_nonce' );
 
-		// Active tab comes from a top-level, non-underscore field so it survives
-		// WAF/security layers that strip `_`-prefixed POST keys.
+		// Which tab was submitted (top-level field; falls back to general).
 		$tab = isset( $_POST['jpwbc_tab'] ) ? sanitize_key( wp_unslash( $_POST['jpwbc_tab'] ) ) : 'general';
 		if ( ! isset( self::TAB_KEYS[ $tab ] ) ) {
 			$tab = 'general';
 		}
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_settings() (the registered sanitize_option_jpwbc_settings filter) rebuilds the option from an allowlist on update_option below.
-		$raw = isset( $_POST[ self::OPTION_KEY ] ) && is_array( $_POST[ self::OPTION_KEY ] )
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each value is run through sanitize_value() per key below.
+		$input = isset( $_POST[ self::OPTION_KEY ] ) && is_array( $_POST[ self::OPTION_KEY ] )
 			? wp_unslash( $_POST[ self::OPTION_KEY ] )
 			: array();
 
-		// Inject the tab the sanitiser keys off (handler-controlled, not from the
-		// option array, so it can never be stripped before sanitisation).
-		$raw['active_tab'] = $tab;
+		// Build the COMPLETE merged option here: start from current values and
+		// overwrite only this tab's keys. This is the single source of the merge,
+		// so the registered sanitiser stays pure/idempotent and can never revert
+		// the save on a repeat pass.
+		$settings = self::get_settings();
+		foreach ( self::TAB_KEYS[ $tab ] as $key ) {
+			$settings[ $key ] = $this->sanitize_value( $key, $input );
+		}
 
-		update_option( self::OPTION_KEY, $raw );
+		update_option( self::OPTION_KEY, $settings );
+
+		/**
+		 * Fires after the settings are saved.
+		 *
+		 * Feature classes hook this to flush rewrite rules / bust caches.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array<string, mixed> $settings The saved settings.
+		 */
+		do_action( 'jpwbc_settings_saved', $settings );
 
 		wp_safe_redirect(
 			add_query_arg(

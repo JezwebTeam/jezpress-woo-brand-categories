@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,10 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.0.4 =
+* Fix: the real cause of settings not saving — the sanitiser merged per-tab and could run more than once per save, and the second pass reverted the change. The merge now happens once in the save handler and the sanitiser is pure/idempotent, so saves always persist.
+* Change: "Other brands clickable" now defaults to on, so every brand in the list is expandable out of the box.
+
 = 1.0.3 =
 * Fix: settings still would not save on sites whose firewall/security layer strips underscore-prefixed form fields. The active tab is now sent as a normal top-level field, so saves persist reliably.
 
@@ -93,6 +97,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.0.4 =
+Fixes the underlying settings-save bug (non-idempotent sanitiser reverting the save) and makes all brands clickable by default.
 
 = 1.0.3 =
 Fixes settings not saving on sites whose security layer strips underscore-prefixed fields. Completes the 1.0.2 save fix.
