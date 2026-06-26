@@ -19,6 +19,7 @@
 ## Ledger
 | Version | Date | Audit | Shipped | JezPress | Dashboard |
 |---|---|---|---|---|---|
+| 1.0.6 | 2026-06-26 | manual | Cosmetic CSS: brand toggle button ignores theme padding/border (!important); light diff-review only (no agent, per audit-guide cosmetic exception); deployed to staging 186999 | uploaded | patched |
 | 1.0.5 | 2026-06-26 | clean | Remove "Other brands clickable" toggle; all brands expandable by default (built-in); deployed + verified on staging 186999 | uploaded | patched |
 | 1.0.4 | 2026-06-26 | clean | REAL settings-save fix: non-idempotent per-tab sanitiser early-returned on its 2nd pass and reverted saves (latent since 1.0.0). Merge moved to handler, sanitiser made idempotent; root cause proven via live POST/sanitise capture on staging 186999; save persistence verified | uploaded | patched |
 | 1.0.3 | 2026-06-26 | clean | Settings-save attempt: active tab sent as top-level field (rule out WAF stripping of underscore-prefixed POST keys) — did not resolve; superseded by 1.0.4 | uploaded | patched |
