@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,11 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.3.0 =
+* New (All Brands A-Z): choose the letter-grid column count (3, 4, 5 or 6; default 5).
+* New (All Brands A-Z): "Show brand list under each letter" toggle — turn it off to show just the A-Z letter grid.
+* New: Elementor Style controls on the Trending Brands and All Brands (A-Z) widgets — heading font size, list font size, and colours (heading, letters, brand links).
+
 = 1.2.0 =
 * New: "Trending Brands" Elementor widget + `[jpwbc_trending_brands]` shortcode — shows the most-clicked brands. Clicks on brand links are tracked (works with page caching); before clicks accrue it falls back to the largest brands so it's never blank.
 * New: "All Brands (A-Z)" Elementor widget + `[jpwbc_all_brands]` shortcode — an alphabet jump-index plus brands grouped under a heading per letter (each letter on its own line; empty letters aren't shown), with an optional "View all" link.
@@ -114,6 +119,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Adds column control + a list on/off toggle + Elementor Style controls (font sizes, colours) to the brand widgets.
 
 = 1.2.0 =
 Adds Trending Brands and All Brands (A-Z) Elementor widgets/shortcodes, with click-tracked trending.

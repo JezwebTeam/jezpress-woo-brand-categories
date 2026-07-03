@@ -273,6 +273,8 @@ class JPWBC_Brands {
 			array(
 				'title'         => __( 'All Brands (A-Z)', 'jezpress-woo-brand-categories' ),
 				'show_index'    => true,
+				'show_groups'   => true,
+				'columns'       => 5,
 				'show_arrow'    => true,
 				'view_all_url'  => '',
 				'view_all_text' => __( 'View all', 'jezpress-woo-brand-categories' ),
@@ -291,11 +293,16 @@ class JPWBC_Brands {
 		static $instance = 0;
 		++$instance;
 
+		$columns = (int) $args['columns'];
+		$columns = ( $columns >= 3 && $columns <= 6 ) ? $columns : 5;
+
 		return jpwbc_get_template(
 			'all-brands-az.php',
 			array(
 				'title'         => (string) $args['title'],
 				'show_index'    => ! empty( $args['show_index'] ),
+				'show_groups'   => ! empty( $args['show_groups'] ),
+				'columns'       => $columns,
 				'show_arrow'    => ! empty( $args['show_arrow'] ),
 				'view_all_url'  => esc_url_raw( (string) $args['view_all_url'] ),
 				'view_all_text' => (string) $args['view_all_text'],
@@ -350,6 +357,8 @@ class JPWBC_Brands {
 			array(
 				'title'         => __( 'All Brands (A-Z)', 'jezpress-woo-brand-categories' ),
 				'show_index'    => 'yes',
+				'show_groups'   => 'yes',
+				'columns'       => 5,
 				'show_arrow'    => 'yes',
 				'view_all_url'  => '',
 				'view_all_text' => __( 'View all', 'jezpress-woo-brand-categories' ),
@@ -362,6 +371,8 @@ class JPWBC_Brands {
 			array(
 				'title'         => $atts['title'],
 				'show_index'    => 'yes' === $atts['show_index'] || '1' === (string) $atts['show_index'],
+				'show_groups'   => 'yes' === $atts['show_groups'] || '1' === (string) $atts['show_groups'],
+				'columns'       => (int) $atts['columns'],
 				'show_arrow'    => 'yes' === $atts['show_arrow'] || '1' === (string) $atts['show_arrow'],
 				'view_all_url'  => $atts['view_all_url'],
 				'view_all_text' => $atts['view_all_text'],

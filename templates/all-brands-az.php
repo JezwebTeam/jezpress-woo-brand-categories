@@ -34,10 +34,17 @@ $jpwbc_view_url = isset( $data['view_all_url'] ) ? (string) $data['view_all_url'
 $jpwbc_view_txt = isset( $data['view_all_text'] ) ? (string) $data['view_all_text'] : '';
 $jpwbc_groups   = isset( $data['groups'] ) && is_array( $data['groups'] ) ? $data['groups'] : array();
 $jpwbc_inst     = isset( $data['instance'] ) ? (int) $data['instance'] : 1;
+$jpwbc_groups_on = ! isset( $data['show_groups'] ) || ! empty( $data['show_groups'] );
+$jpwbc_cols      = isset( $data['columns'] ) ? (int) $data['columns'] : 5;
+$jpwbc_cols      = ( $jpwbc_cols >= 3 && $jpwbc_cols <= 6 ) ? $jpwbc_cols : 5;
 
 if ( empty( $jpwbc_groups ) ) {
 	return;
 }
+
+// With the brand lists hidden there is nothing on the page to jump to, so the
+// index letters render as plain text rather than in-page anchors.
+$jpwbc_index_links = $jpwbc_groups_on;
 
 /**
  * Build the anchor id for a letter group.
@@ -65,13 +72,15 @@ $jpwbc_alphabet = array_merge( range( 'A', 'Z' ), array( '#' ) );
 	<?php endif; ?>
 
 	<?php if ( $jpwbc_index ) : ?>
-		<nav class="jpwbc-az-index" aria-label="<?php esc_attr_e( 'Jump to brands by letter', 'jezpress-woo-brand-categories' ); ?>">
+		<nav class="jpwbc-az-index jpwbc-az-index--cols-<?php echo esc_attr( (string) $jpwbc_cols ); ?>" aria-label="<?php esc_attr_e( 'Brands by letter', 'jezpress-woo-brand-categories' ); ?>">
 			<?php
 			foreach ( $jpwbc_alphabet as $jpwbc_letter ) :
 				$jpwbc_has = in_array( $jpwbc_letter, $jpwbc_present, true );
-				if ( $jpwbc_has ) :
+				if ( $jpwbc_has && $jpwbc_index_links ) :
 					?>
 					<a class="jpwbc-az-index__letter" href="#<?php echo esc_attr( $jpwbc_anchor( $jpwbc_letter, $jpwbc_inst ) ); ?>"><?php echo esc_html( $jpwbc_letter ); ?></a>
+				<?php elseif ( $jpwbc_has ) : ?>
+					<span class="jpwbc-az-index__letter"><?php echo esc_html( $jpwbc_letter ); ?></span>
 				<?php else : ?>
 					<span class="jpwbc-az-index__letter is-empty" aria-hidden="true"><?php echo esc_html( $jpwbc_letter ); ?></span>
 				<?php endif; ?>
@@ -79,24 +88,26 @@ $jpwbc_alphabet = array_merge( range( 'A', 'Z' ), array( '#' ) );
 		</nav>
 	<?php endif; ?>
 
-	<div class="jpwbc-az-groups">
-		<?php foreach ( $jpwbc_groups as $jpwbc_letter => $jpwbc_brands ) : ?>
-			<section class="jpwbc-az-group" id="<?php echo esc_attr( $jpwbc_anchor( (string) $jpwbc_letter, $jpwbc_inst ) ); ?>">
-				<h4 class="jpwbc-az-group__letter"><?php echo esc_html( (string) $jpwbc_letter ); ?></h4>
-				<ul class="jpwbc-az-group__list">
-					<?php foreach ( $jpwbc_brands as $jpwbc_brand ) : ?>
-						<?php if ( '' === (string) $jpwbc_brand['url'] ) { continue; } ?>
-						<li class="jpwbc-az-group__item">
-							<a href="<?php echo esc_url( (string) $jpwbc_brand['url'] ); ?>"
-								data-jpwbc-brand="<?php echo esc_attr( (string) (int) $jpwbc_brand['term_id'] ); ?>">
-								<?php echo esc_html( (string) $jpwbc_brand['name'] ); ?>
-							</a>
-						</li>
-					<?php endforeach; ?>
-				</ul>
-			</section>
-		<?php endforeach; ?>
-	</div>
+	<?php if ( $jpwbc_groups_on ) : ?>
+		<div class="jpwbc-az-groups">
+			<?php foreach ( $jpwbc_groups as $jpwbc_letter => $jpwbc_brands ) : ?>
+				<section class="jpwbc-az-group" id="<?php echo esc_attr( $jpwbc_anchor( (string) $jpwbc_letter, $jpwbc_inst ) ); ?>">
+					<h4 class="jpwbc-az-group__letter"><?php echo esc_html( (string) $jpwbc_letter ); ?></h4>
+					<ul class="jpwbc-az-group__list">
+						<?php foreach ( $jpwbc_brands as $jpwbc_brand ) : ?>
+							<?php if ( '' === (string) $jpwbc_brand['url'] ) { continue; } ?>
+							<li class="jpwbc-az-group__item">
+								<a href="<?php echo esc_url( (string) $jpwbc_brand['url'] ); ?>"
+									data-jpwbc-brand="<?php echo esc_attr( (string) (int) $jpwbc_brand['term_id'] ); ?>">
+									<?php echo esc_html( (string) $jpwbc_brand['name'] ); ?>
+								</a>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				</section>
+			<?php endforeach; ?>
+		</div>
+	<?php endif; ?>
 
 	<?php if ( '' !== $jpwbc_view_url && '' !== $jpwbc_view_txt ) : ?>
 		<p class="jpwbc-allbrands__viewall">

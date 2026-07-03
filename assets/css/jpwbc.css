@@ -197,13 +197,19 @@
 	border-bottom-color: var(--jpwbc-teal);
 }
 
-/* A-Z jump index */
+/* A-Z jump index — a configurable N-column grid (default 5) */
 .jpwbc-az-index {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.35em 0.7em;
+	display: grid;
+	grid-template-columns: repeat( 5, minmax( 0, 1fr ) );
+	gap: 0.5em;
 	margin: 0 0 1em;
+	text-align: center;
 }
+
+.jpwbc-az-index--cols-3 { grid-template-columns: repeat( 3, minmax( 0, 1fr ) ); }
+.jpwbc-az-index--cols-4 { grid-template-columns: repeat( 4, minmax( 0, 1fr ) ); }
+.jpwbc-az-index--cols-5 { grid-template-columns: repeat( 5, minmax( 0, 1fr ) ); }
+.jpwbc-az-index--cols-6 { grid-template-columns: repeat( 6, minmax( 0, 1fr ) ); }
 
 .jpwbc-az-index__letter {
 	font-weight: 600;

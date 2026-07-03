@@ -104,7 +104,34 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 		$this->add_control(
 			'show_index',
 			array(
-				'label'        => __( 'Show A-Z jump bar', 'jezpress-woo-brand-categories' ),
+				'label'        => __( 'Show A-Z letter grid', 'jezpress-woo-brand-categories' ),
+				'type'         => \Elementor\Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'return_value' => 'yes',
+			)
+		);
+
+		$this->add_control(
+			'columns',
+			array(
+				'label'     => __( 'Letter grid columns', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'default'   => '5',
+				'options'   => array(
+					'3' => '3',
+					'4' => '4',
+					'5' => '5',
+					'6' => '6',
+				),
+				'condition' => array( 'show_index' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'show_groups',
+			array(
+				'label'        => __( 'Show brand list under each letter', 'jezpress-woo-brand-categories' ),
+				'description'  => __( 'Off = show only the A-Z letter grid.', 'jezpress-woo-brand-categories' ),
 				'type'         => \Elementor\Controls_Manager::SWITCHER,
 				'default'      => 'yes',
 				'return_value' => 'yes',
@@ -141,6 +168,92 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 		);
 
 		$this->end_controls_section();
+
+		$this->register_style_controls();
+	}
+
+	/**
+	 * Register the Style-tab controls (font sizes + colours), scoped to this widget.
+	 *
+	 * @since 1.3.0
+	 */
+	protected function register_style_controls(): void {
+		$this->start_controls_section(
+			'jpwbc_style',
+			array(
+				'label' => __( 'Style', 'jezpress-woo-brand-categories' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'heading_size',
+			array(
+				'label'      => __( 'Heading font size', 'jezpress-woo-brand-categories' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array(
+					'px' => array( 'min' => 10, 'max' => 60 ),
+					'em' => array( 'min' => 0.5, 'max' => 4, 'step' => 0.1 ),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .jpwbc-allbrands__title' => 'font-size: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'heading_color',
+			array(
+				'label'     => __( 'Heading colour', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-allbrands__title' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'letter_color',
+			array(
+				'label'     => __( 'Letter colour (grid + section headings)', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-az-index__letter:not(.is-empty)' => 'color: {{VALUE}};',
+					'{{WRAPPER}} .jpwbc-az-group__letter'                => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'list_size',
+			array(
+				'label'      => __( 'List font size', 'jezpress-woo-brand-categories' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array(
+					'px' => array( 'min' => 10, 'max' => 30 ),
+					'em' => array( 'min' => 0.5, 'max' => 2, 'step' => 0.05 ),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .jpwbc-az-index'        => 'font-size: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} .jpwbc-az-group__list'  => 'font-size: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'link_color',
+			array(
+				'label'     => __( 'Brand link colour', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-az-group__item a' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
 	}
 
 	/**
@@ -160,6 +273,8 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 			array(
 				'title'         => isset( $settings['title'] ) ? (string) $settings['title'] : '',
 				'show_index'    => isset( $settings['show_index'] ) && 'yes' === $settings['show_index'],
+				'show_groups'   => isset( $settings['show_groups'] ) && 'yes' === $settings['show_groups'],
+				'columns'       => isset( $settings['columns'] ) ? (int) $settings['columns'] : 5,
 				'show_arrow'    => isset( $settings['show_arrow'] ) && 'yes' === $settings['show_arrow'],
 				'view_all_url'  => $url,
 				'view_all_text' => isset( $settings['view_all_text'] ) ? (string) $settings['view_all_text'] : '',

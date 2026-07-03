@@ -123,6 +123,70 @@ class JPWBC_Elementor_Trending extends \Elementor\Widget_Base {
 		);
 
 		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'jpwbc_style',
+			array(
+				'label' => __( 'Style', 'jezpress-woo-brand-categories' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'heading_size',
+			array(
+				'label'      => __( 'Heading font size', 'jezpress-woo-brand-categories' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array(
+					'px' => array( 'min' => 10, 'max' => 60 ),
+					'em' => array( 'min' => 0.5, 'max' => 4, 'step' => 0.1 ),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .jpwbc-trending__title' => 'font-size: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'heading_color',
+			array(
+				'label'     => __( 'Heading colour', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-trending__title' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'list_size',
+			array(
+				'label'      => __( 'List font size', 'jezpress-woo-brand-categories' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array(
+					'px' => array( 'min' => 10, 'max' => 30 ),
+					'em' => array( 'min' => 0.5, 'max' => 2, 'step' => 0.05 ),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .jpwbc-trending__list' => 'font-size: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'link_color',
+			array(
+				'label'     => __( 'Brand link colour', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-trending__item a' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
 	}
 
 	/**
