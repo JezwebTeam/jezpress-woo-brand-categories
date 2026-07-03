@@ -19,6 +19,7 @@
 ## Ledger
 | Version | Date | Audit | Shipped | JezPress | Dashboard |
 |---|---|---|---|---|---|
+| 1.2.0 | 2026-06-26 | clean | New Trending Brands (click-tracked via nonce'd AJAX + term meta; 1h cache; fallback so never blank) and All Brands (A-Z) (alphabet jump-index + per-letter grouped sections) widgets/shortcodes; shared on-demand asset enqueue; audit PASS (A-Z query cached per finding). CI registered version OK this time; deployed to staging 186999 | uploaded | patched |
 | 1.1.0 | 2026-06-26 | clean | New Style tab: colour pickers (active/chevron/accent) output as CSS variables; hex-validated, idempotent save preserved. CI upload step reported success but did NOT register the version — caught by verifying the server, uploaded manually with --ver. Deployed to staging 186999 | uploaded | patched |
 | 1.0.6 | 2026-06-26 | manual | Cosmetic CSS: brand toggle button ignores theme padding/border (!important); light diff-review only (no agent, per audit-guide cosmetic exception); deployed to staging 186999 | uploaded | patched |
 | 1.0.5 | 2026-06-26 | clean | Remove "Other brands clickable" toggle; all brands expandable by default (built-in); deployed + verified on staging 186999 | uploaded | patched |
