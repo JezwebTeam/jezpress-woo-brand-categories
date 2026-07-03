@@ -150,3 +150,102 @@
 .jpwbc-error {
 	color: #b32d2e;
 }
+
+/* -------------------------------------------------------------------------
+ * Trending Brands + All Brands (A-Z) widgets
+ * ------------------------------------------------------------------------- */
+.jpwbc-trending__title,
+.jpwbc-allbrands__title {
+	display: flex;
+	align-items: center;
+	gap: 0.4em;
+	margin: 0 0 0.6em;
+	font-weight: 700;
+}
+
+.jpwbc-arrow {
+	width: 0;
+	height: 0;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+	border-left: 7px solid var(--jpwbc-pink-light);
+}
+
+.jpwbc-trending__list,
+.jpwbc-az-group__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.jpwbc-trending__item {
+	padding: 0.28em 0;
+}
+
+.jpwbc-trending__item > a,
+.jpwbc-az-group__item > a {
+	color: inherit;
+	text-decoration: none;
+	border-bottom: 1px solid transparent;
+}
+
+.jpwbc-trending__item > a:hover,
+.jpwbc-trending__item > a:focus,
+.jpwbc-az-group__item > a:hover,
+.jpwbc-az-group__item > a:focus {
+	color: var(--jpwbc-pink);
+	border-bottom-color: var(--jpwbc-teal);
+}
+
+/* A-Z jump index */
+.jpwbc-az-index {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35em 0.7em;
+	margin: 0 0 1em;
+}
+
+.jpwbc-az-index__letter {
+	font-weight: 600;
+	text-decoration: none;
+	color: var(--jpwbc-pink);
+}
+
+.jpwbc-az-index__letter:hover,
+.jpwbc-az-index__letter:focus {
+	color: var(--jpwbc-teal);
+}
+
+.jpwbc-az-index__letter.is-empty {
+	color: #c7c7cc;
+	font-weight: 400;
+	cursor: default;
+}
+
+/* Grouped brand list — one letter section per line */
+.jpwbc-az-group {
+	margin: 0 0 1.1em;
+	scroll-margin-top: 80px; /* so jump links clear a sticky header */
+}
+
+.jpwbc-az-group__letter {
+	margin: 0 0 0.3em;
+	padding-bottom: 0.2em;
+	font-size: 1.05em;
+	font-weight: 700;
+	color: var(--jpwbc-pink);
+	border-bottom: 1px solid var(--jpwbc-border);
+}
+
+.jpwbc-az-group__item {
+	padding: 0.22em 0;
+}
+
+.jpwbc-allbrands__viewall {
+	margin: 0.4em 0 0;
+}
+
+.jpwbc-allbrands__viewall > a {
+	color: var(--jpwbc-pink);
+	font-weight: 600;
+}

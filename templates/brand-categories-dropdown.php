@@ -61,7 +61,8 @@ if ( empty( $jpwbc_brands ) ) {
 			?>
 			<li class="<?php echo esc_attr( $jpwbc_li_classes ); ?>" data-brand-id="<?php echo esc_attr( (string) (int) $jpwbc_brand['term_id'] ); ?>">
 				<div class="jpwbc-brand__row">
-					<a class="jpwbc-brand__link" href="<?php echo esc_url( (string) $jpwbc_brand['url'] ); ?>">
+					<a class="jpwbc-brand__link" href="<?php echo esc_url( (string) $jpwbc_brand['url'] ); ?>"
+						data-jpwbc-brand="<?php echo esc_attr( (string) (int) $jpwbc_brand['term_id'] ); ?>">
 						<?php echo esc_html( (string) $jpwbc_brand['name'] ); ?>
 					</a>
 					<?php if ( $jpwbc_expandable ) : ?>

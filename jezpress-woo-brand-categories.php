@@ -3,7 +3,7 @@
  * Plugin Name: JezPress Woo Brand Categories
  * Plugin URI: https://jezpress.com/plugins/jezpress-woo-brand-categories
  * Description: In-brand product-category navigation and clean brand+category URLs for WooCommerce brand archives.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Jezweb
  * Author URI: https://jezpress.com
  * License: GPL-2.0+
@@ -76,7 +76,7 @@ if ( version_compare( PHP_VERSION, '8.1.0', '<' ) ) {
  *
  * @since 1.0.0
  */
-define( 'JPWBC_VERSION', '1.1.0' );
+define( 'JPWBC_VERSION', '1.2.0' );
 define( 'JPWBC_PLUGIN_FILE', __FILE__ );
 define( 'JPWBC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JPWBC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -262,6 +262,55 @@ function jpwbc_get_template( string $name, array $args = array() ): string {
 }
 
 /**
+ * Enqueue the shared front-end CSS/JS (idempotent).
+ *
+ * Used both on brand archives (for the dropdown) and on-demand by the Trending
+ * / All Brands widgets, which can appear on any page. Also applies the
+ * admin-chosen colours as CSS custom properties.
+ *
+ * @since 1.2.0
+ */
+function jpwbc_enqueue_frontend_assets(): void {
+	if ( wp_style_is( 'jpwbc-frontend', 'enqueued' ) ) {
+		return;
+	}
+
+	wp_enqueue_style( 'jpwbc-frontend', JPWBC_PLUGIN_URL . 'assets/css/jpwbc.css', array(), JPWBC_VERSION );
+	wp_enqueue_script( 'jpwbc-frontend', JPWBC_PLUGIN_URL . 'assets/js/jpwbc.js', array(), JPWBC_VERSION, true );
+
+	wp_localize_script(
+		'jpwbc-frontend',
+		'jpwbcFront',
+		array(
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'jpwbc_front_nonce' ),
+			'i18n'    => array(
+				'loading' => __( 'Loading…', 'jezpress-woo-brand-categories' ),
+				'error'   => __( 'Could not load categories.', 'jezpress-woo-brand-categories' ),
+			),
+		)
+	);
+
+	if ( class_exists( 'JPWBC_Admin' ) ) {
+		$settings = JPWBC_Admin::get_settings();
+		$active   = sanitize_hex_color( (string) ( $settings['color_active'] ?? '' ) );
+		$light    = sanitize_hex_color( (string) ( $settings['color_active_light'] ?? '' ) );
+		$accent   = sanitize_hex_color( (string) ( $settings['color_accent'] ?? '' ) );
+		if ( $active && $light && $accent ) {
+			wp_add_inline_style(
+				'jpwbc-frontend',
+				sprintf(
+					'.jpwbc-brand-cats{--jpwbc-pink:%s;--jpwbc-pink-light:%s;--jpwbc-teal:%s;}',
+					$active,
+					$light,
+					$accent
+				)
+			);
+		}
+	}
+}
+
+/**
  * Include required class files
  *
  * @since 1.0.0
@@ -279,12 +328,13 @@ function jpwbc_include_files(): void {
 	// JezPress updater
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-updater.php';
 
-	// Feature classes (cache, query, rewrites, frontend, SEO).
+	// Feature classes (cache, query, rewrites, frontend, SEO, brand directory).
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-cache.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-query.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-rewrites.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-frontend.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-seo-rankmath.php';
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-brands.php';
 }
 
 /**
@@ -360,7 +410,12 @@ function jpwbc_init(): void {
 			$seo = new JPWBC_SEO_RankMath( $query, $rewrites, $settings );
 			$seo->register_hooks();
 
-			// Register the Elementor widget when Elementor is active.
+			// Brand directory: Trending Brands + All Brands (A-Z) shortcodes,
+			// click tracking, and (below) their Elementor widgets.
+			$brands = new JPWBC_Brands();
+			$brands->register_hooks();
+
+			// Register the Elementor widgets when Elementor is active.
 			add_action( 'elementor/widgets/register', 'jpwbc_register_elementor_widget' );
 		}
 
@@ -378,16 +433,29 @@ function jpwbc_init(): void {
 add_action( 'plugins_loaded', 'jpwbc_init', 20 );
 
 /**
- * Register the Elementor widget.
+ * Register the Elementor widgets.
  *
  * @since 1.0.0
  *
  * @param mixed $widgets_manager Elementor widgets manager.
  */
 function jpwbc_register_elementor_widget( $widgets_manager ): void {
+	if ( ! is_object( $widgets_manager ) || ! method_exists( $widgets_manager, 'register' ) ) {
+		return;
+	}
+
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-widget.php';
-	if ( class_exists( 'JPWBC_Elementor_Widget' ) && is_object( $widgets_manager ) && method_exists( $widgets_manager, 'register' ) ) {
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-trending.php';
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-brands-az.php';
+
+	if ( class_exists( 'JPWBC_Elementor_Widget' ) ) {
 		$widgets_manager->register( new JPWBC_Elementor_Widget() );
+	}
+	if ( class_exists( 'JPWBC_Elementor_Trending' ) ) {
+		$widgets_manager->register( new JPWBC_Elementor_Trending() );
+	}
+	if ( class_exists( 'JPWBC_Elementor_Brands_AZ' ) ) {
+		$widgets_manager->register( new JPWBC_Elementor_Brands_AZ() );
 	}
 }
 

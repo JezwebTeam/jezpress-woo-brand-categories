@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,8 @@ On a brand archive (for example `/brands/dmc/`), visitors can narrow the listing
 * Optional brand search box; every brand in the list is expandable to reveal its categories inline (lazy-loaded).
 * Combo Preview admin tab (per-brand categories, counts, generated URLs, indexing status) and a Cache tab with object-cache status and a one-click rebuild.
 * Style tab with colour pickers (active/highlight, toggle chevron, hover accent) — no CSS editing required.
+* Trending Brands widget/shortcode — shows the most-clicked brands (click-tracked, cache-safe), with a sensible fallback so it's never empty.
+* All Brands (A-Z) widget/shortcode — an alphabet jump-index plus brands grouped under a heading per letter (empty letters are never shown as lonely rows).
 
 = Requirements =
 
@@ -76,6 +78,11 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.2.0 =
+* New: "Trending Brands" Elementor widget + `[jpwbc_trending_brands]` shortcode — shows the most-clicked brands. Clicks on brand links are tracked (works with page caching); before clicks accrue it falls back to the largest brands so it's never blank.
+* New: "All Brands (A-Z)" Elementor widget + `[jpwbc_all_brands]` shortcode — an alphabet jump-index plus brands grouped under a heading per letter (each letter on its own line; empty letters aren't shown), with an optional "View all" link.
+* Both new widgets inherit the Style-tab colours.
+
 = 1.1.0 =
 * New: a "Style" tab with colour pickers for the active/highlight colour, the toggle chevron, and the hover accent. Colours are applied on the front end as CSS variables, so you can match your theme without editing any CSS.
 
@@ -107,6 +114,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Adds Trending Brands and All Brands (A-Z) Elementor widgets/shortcodes, with click-tracked trending.
 
 = 1.1.0 =
 Adds a Style tab to control the dropdown colours from the admin (no CSS editing).

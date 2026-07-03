@@ -120,7 +120,8 @@ class JPWBC_Frontend {
 	}
 
 	/**
-	 * Enqueue CSS/JS on brand archives only.
+	 * Enqueue CSS/JS on brand archives (the dropdown). Widgets placed elsewhere
+	 * enqueue on demand via jpwbc_enqueue_frontend_assets().
 	 *
 	 * @since 1.0.0
 	 */
@@ -128,51 +129,7 @@ class JPWBC_Frontend {
 		if ( ! $this->is_brand_archive() ) {
 			return;
 		}
-
-		wp_enqueue_style(
-			'jpwbc-frontend',
-			JPWBC_PLUGIN_URL . 'assets/css/jpwbc.css',
-			array(),
-			JPWBC_VERSION
-		);
-
-		// Apply the admin-chosen colours as CSS custom properties (overriding the
-		// defaults in jpwbc.css). Values are pre-validated hex via get_settings().
-		$active = sanitize_hex_color( (string) ( $this->settings['color_active'] ?? '' ) );
-		$light  = sanitize_hex_color( (string) ( $this->settings['color_active_light'] ?? '' ) );
-		$accent = sanitize_hex_color( (string) ( $this->settings['color_accent'] ?? '' ) );
-		if ( $active && $light && $accent ) {
-			wp_add_inline_style(
-				'jpwbc-frontend',
-				sprintf(
-					'.jpwbc-brand-cats{--jpwbc-pink:%s;--jpwbc-pink-light:%s;--jpwbc-teal:%s;}',
-					$active,
-					$light,
-					$accent
-				)
-			);
-		}
-
-		wp_enqueue_script(
-			'jpwbc-frontend',
-			JPWBC_PLUGIN_URL . 'assets/js/jpwbc.js',
-			array(),
-			JPWBC_VERSION,
-			true
-		);
-
-		wp_localize_script(
-			'jpwbc-frontend',
-			'jpwbcFront',
-			array(
-				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'jpwbc_front_nonce' ),
-				'i18n'    => array(
-					'loading' => __( 'Loading…', 'jezpress-woo-brand-categories' ),
-					'error'   => __( 'Could not load categories.', 'jezpress-woo-brand-categories' ),
-				),
-			)
-		);
+		jpwbc_enqueue_frontend_assets();
 	}
 
 	/**

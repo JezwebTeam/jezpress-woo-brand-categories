@@ -54,6 +54,11 @@ if ( false !== $timestamp ) {
 }
 
 /**
+ * Delete brand click-count term meta (used by Trending Brands).
+ */
+delete_metadata( 'term', 0, '_jpwbc_clicks', '', true );
+
+/**
  * Delete license data option (uses hashed name)
  */
 $license_option = 'jzwb_lic_' . substr( md5( 'jezpress-woo-brand-categories' ), 0, 8 );

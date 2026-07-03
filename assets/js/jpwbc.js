@@ -118,6 +118,30 @@
 		} );
 	}
 
+	// Record brand-link clicks (feeds the Trending Brands ordering). Fires on
+	// capture so it runs before the browser navigates away; sendBeacon survives
+	// the page unload. Best-effort — a failed ping just means one uncounted click.
+	function trackClick( e ) {
+		var link = e.target.closest ? e.target.closest( '[data-jpwbc-brand]' ) : null;
+		if ( ! link ) {
+			return;
+		}
+		var id = link.getAttribute( 'data-jpwbc-brand' );
+		if ( ! id || ! cfg.ajaxUrl ) {
+			return;
+		}
+		var data = new FormData();
+		data.append( 'action', 'jpwbc_track_click' );
+		data.append( 'nonce', cfg.nonce || '' );
+		data.append( 'brand_id', id );
+
+		if ( navigator.sendBeacon ) {
+			navigator.sendBeacon( cfg.ajaxUrl, data );
+		} else if ( window.fetch ) {
+			fetch( cfg.ajaxUrl, { method: 'POST', body: data, credentials: 'same-origin', keepalive: true } );
+		}
+	}
+
 	ready( function () {
 		var roots = document.querySelectorAll( '.jpwbc-brand-cats' );
 		Array.prototype.forEach.call( roots, function ( root ) {
@@ -127,5 +151,7 @@
 			bindToggles( root );
 			bindSearch( root );
 		} );
+
+		document.addEventListener( 'click', trackClick, true );
 	} );
 }() );
