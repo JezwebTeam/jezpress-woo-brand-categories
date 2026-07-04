@@ -19,6 +19,7 @@
 ## Ledger
 | Version | Date | Audit | Shipped | JezPress | Dashboard |
 |---|---|---|---|---|---|
+| 1.4.0 | 2026-06-26 | manual | Typography group controls (font family+size+weight) on Trending + All Brands (A-Z) widgets (heading/letters/lists), replacing the size-only sliders; removed Trending/A-Z list bullets (list-style:none !important). Light diff-review only (Elementor Style-control + CSS, no attack surface, per audit-guide). Deployed to staging 186999 | uploaded | patched |
 | 1.3.0 | 2026-06-26 | clean | All Brands (A-Z): column control (3/4/5/6) + show-brand-list toggle; Elementor Style controls (heading/list font size + colours) on both new widgets. Audit PASS (1 M: .pot header-only since scaffold, deferred - no wp-cli i18n). Deployed to staging 186999 | uploaded | patched |
 | 1.2.0 | 2026-06-26 | clean | New Trending Brands (click-tracked via nonce'd AJAX + term meta; 1h cache; fallback so never blank) and All Brands (A-Z) (alphabet jump-index + per-letter grouped sections) widgets/shortcodes; shared on-demand asset enqueue; audit PASS (A-Z query cached per finding). CI registered version OK this time; deployed to staging 186999 | uploaded | patched |
 | 1.1.0 | 2026-06-26 | clean | New Style tab: colour pickers (active/chevron/accent) output as CSS variables; hex-validated, idempotent save preserved. CI upload step reported success but did NOT register the version — caught by verifying the server, uploaded manually with --ver. Deployed to staging 186999 | uploaded | patched |
