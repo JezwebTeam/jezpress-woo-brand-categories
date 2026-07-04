@@ -132,19 +132,12 @@ class JPWBC_Elementor_Trending extends \Elementor\Widget_Base {
 			)
 		);
 
-		$this->add_responsive_control(
-			'heading_size',
+		$this->add_group_control(
+			\Elementor\Group_Control_Typography::get_type(),
 			array(
-				'label'      => __( 'Heading font size', 'jezpress-woo-brand-categories' ),
-				'type'       => \Elementor\Controls_Manager::SLIDER,
-				'size_units' => array( 'px', 'em', 'rem' ),
-				'range'      => array(
-					'px' => array( 'min' => 10, 'max' => 60 ),
-					'em' => array( 'min' => 0.5, 'max' => 4, 'step' => 0.1 ),
-				),
-				'selectors'  => array(
-					'{{WRAPPER}} .jpwbc-trending__title' => 'font-size: {{SIZE}}{{UNIT}};',
-				),
+				'name'     => 'heading_typography',
+				'label'    => __( 'Heading typography', 'jezpress-woo-brand-categories' ),
+				'selector' => '{{WRAPPER}} .jpwbc-trending__title',
 			)
 		);
 
@@ -159,19 +152,12 @@ class JPWBC_Elementor_Trending extends \Elementor\Widget_Base {
 			)
 		);
 
-		$this->add_responsive_control(
-			'list_size',
+		$this->add_group_control(
+			\Elementor\Group_Control_Typography::get_type(),
 			array(
-				'label'      => __( 'List font size', 'jezpress-woo-brand-categories' ),
-				'type'       => \Elementor\Controls_Manager::SLIDER,
-				'size_units' => array( 'px', 'em', 'rem' ),
-				'range'      => array(
-					'px' => array( 'min' => 10, 'max' => 30 ),
-					'em' => array( 'min' => 0.5, 'max' => 2, 'step' => 0.05 ),
-				),
-				'selectors'  => array(
-					'{{WRAPPER}} .jpwbc-trending__list' => 'font-size: {{SIZE}}{{UNIT}};',
-				),
+				'name'     => 'list_typography',
+				'label'    => __( 'List typography', 'jezpress-woo-brand-categories' ),
+				'selector' => '{{WRAPPER}} .jpwbc-trending__list',
 			)
 		);
 

@@ -173,9 +173,20 @@
 
 .jpwbc-trending__list,
 .jpwbc-az-group__list {
-	list-style: none;
+	list-style: none !important;
 	margin: 0;
-	padding: 0;
+	padding: 0 !important;
+}
+
+.jpwbc-trending__item,
+.jpwbc-az-group__item {
+	list-style: none !important;
+	margin: 0;
+}
+
+.jpwbc-trending__item::before,
+.jpwbc-az-group__item::before {
+	content: none !important;
 }
 
 .jpwbc-trending__item {
