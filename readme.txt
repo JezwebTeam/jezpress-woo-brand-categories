@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,10 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.7.0 =
+* New (All Brands A-Z): "Letters link to (Brands page URL)" option — make each A-Z letter link to your dedicated Brands page and jump straight to that letter. Ideal for a menu/mega-menu where the letter grid is shown without the brand lists.
+* Change: the per-letter section anchors are now stable (e.g. `#jpwbc-az-b` instead of `#jpwbc-az-2-b`), so cross-page letter links from another widget always land on the right section.
+
 = 1.6.0 =
 * New (All Brands A-Z): "Alphabet layout" option — choose between the column grid and an inline row of boxed letters (like the Myer brands page).
 
@@ -130,6 +134,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.7.0 =
+Adds a "Letters link to" option so the A-Z letter grid (e.g. in a menu) can link to your Brands page at each letter. Section anchors are now stable (#jpwbc-az-b); if you hard-coded an old #jpwbc-az-N-x anchor anywhere, update it.
 
 = 1.6.0 =
 Adds an "Alphabet layout" option to the All Brands (A-Z) widget: column grid or an inline row of boxed letters.

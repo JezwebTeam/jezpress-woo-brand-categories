@@ -19,6 +19,7 @@
  *     @type bool   $show_letter_counts Show a "(N)" count per letter.
  *     @type bool   $show_search        Show the brand search box.
  *     @type bool   $show_arrow         Show arrow after the heading.
+ *     @type string $index_url          Optional Brands-page URL; makes each A-Z letter link to "{url}#jpwbc-az-{letter}".
  *     @type string $view_all_url       Optional "View all" URL.
  *     @type string $view_all_text      "View all" label.
  *     @type array  $groups             Letter => [ {term_id,name,slug,url}, ... ].
@@ -35,6 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $jpwbc_title    = isset( $data['title'] ) ? (string) $data['title'] : '';
 $jpwbc_arrow    = ! empty( $data['show_arrow'] );
 $jpwbc_index    = ! empty( $data['show_index'] );
+$jpwbc_ix_url   = isset( $data['index_url'] ) ? (string) $data['index_url'] : '';
 $jpwbc_view_url = isset( $data['view_all_url'] ) ? (string) $data['view_all_url'] : '';
 $jpwbc_view_txt = isset( $data['view_all_text'] ) ? (string) $data['view_all_text'] : '';
 $jpwbc_groups   = isset( $data['groups'] ) && is_array( $data['groups'] ) ? $data['groups'] : array();
@@ -58,20 +60,24 @@ $jpwbc_index_class .= ( 'inline' === $jpwbc_ix_layout )
 	? ' jpwbc-az-index--inline'
 	: ' jpwbc-az-index--cols-' . $jpwbc_cols;
 
-// With the brand lists hidden there is nothing on the page to jump to, so the
-// index letters render as plain text rather than in-page anchors.
-$jpwbc_index_links = $jpwbc_groups_on;
+// The index letters become links when either (a) a cross-page Brands URL is set
+// (menu use case — link to the Brands page at that letter), or (b) the brand
+// lists are shown on this same widget (in-page jump). With neither, there is
+// nothing to point at, so they render as plain text.
+$jpwbc_index_links = ( '' !== $jpwbc_ix_url ) || $jpwbc_groups_on;
 
 /**
- * Build the anchor id for a letter group.
+ * Build the stable anchor id for a letter group.
+ *
+ * Deliberately instance-independent so cross-page links from another widget
+ * (e.g. the menu) can target "{brands-url}#jpwbc-az-b" reliably.
  *
  * @param string $letter Group key.
- * @param int    $inst   Instance id.
  * @return string
  */
-$jpwbc_anchor = static function ( string $letter, int $inst ): string {
+$jpwbc_anchor = static function ( string $letter ): string {
 	$slug = ( '#' === $letter ) ? 'num' : strtolower( $letter );
-	return 'jpwbc-az-' . $inst . '-' . $slug;
+	return 'jpwbc-az-' . $slug;
 };
 
 $jpwbc_present  = array_keys( $jpwbc_groups );
@@ -101,8 +107,11 @@ $jpwbc_alphabet = array_merge( range( 'A', 'Z' ), array( '#' ) );
 			foreach ( $jpwbc_alphabet as $jpwbc_letter ) :
 				$jpwbc_has = in_array( $jpwbc_letter, $jpwbc_present, true );
 				if ( $jpwbc_has && $jpwbc_index_links ) :
+					$jpwbc_href = ( '' !== $jpwbc_ix_url )
+						? esc_url( $jpwbc_ix_url . '#' . $jpwbc_anchor( $jpwbc_letter ) )
+						: '#' . esc_attr( $jpwbc_anchor( $jpwbc_letter ) );
 					?>
-					<a class="jpwbc-az-index__letter" href="#<?php echo esc_attr( $jpwbc_anchor( $jpwbc_letter, $jpwbc_inst ) ); ?>"><?php echo esc_html( $jpwbc_letter ); ?></a>
+					<a class="jpwbc-az-index__letter" href="<?php echo $jpwbc_href; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above via esc_url / esc_attr. ?>"><?php echo esc_html( $jpwbc_letter ); ?></a>
 				<?php elseif ( $jpwbc_has ) : ?>
 					<span class="jpwbc-az-index__letter"><?php echo esc_html( $jpwbc_letter ); ?></span>
 				<?php else : ?>
@@ -115,7 +124,7 @@ $jpwbc_alphabet = array_merge( range( 'A', 'Z' ), array( '#' ) );
 	<?php if ( $jpwbc_groups_on ) : ?>
 		<div class="jpwbc-az-groups">
 			<?php foreach ( $jpwbc_groups as $jpwbc_letter => $jpwbc_brands ) : ?>
-				<section class="jpwbc-az-group" id="<?php echo esc_attr( $jpwbc_anchor( (string) $jpwbc_letter, $jpwbc_inst ) ); ?>">
+				<section class="jpwbc-az-group" id="<?php echo esc_attr( $jpwbc_anchor( (string) $jpwbc_letter ) ); ?>">
 					<h4 class="jpwbc-az-group__letter">
 						<?php echo esc_html( (string) $jpwbc_letter ); ?>
 						<?php if ( $jpwbc_counts ) : ?>

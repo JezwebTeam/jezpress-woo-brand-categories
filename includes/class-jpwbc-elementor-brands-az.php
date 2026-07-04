@@ -205,6 +205,18 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 		);
 
 		$this->add_control(
+			'index_url',
+			array(
+				'label'       => __( 'Letters link to (Brands page URL)', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'Make each A-Z letter link to your Brands page and jump to that letter (e.g. /all-brands/). Ideal for a menu — leave empty to use in-page jumps to the lists below.', 'jezpress-woo-brand-categories' ),
+				'type'        => \Elementor\Controls_Manager::URL,
+				'placeholder' => '/all-brands/',
+				'options'     => array( 'url' ),
+				'condition'   => array( 'show_index' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
 			'view_all_url',
 			array(
 				'label'       => __( '"View all" link (optional)', 'jezpress-woo-brand-categories' ),
@@ -333,6 +345,11 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 			$url = (string) $settings['view_all_url']['url'];
 		}
 
+		$index_url = '';
+		if ( isset( $settings['index_url']['url'] ) ) {
+			$index_url = (string) $settings['index_url']['url'];
+		}
+
 		echo JPWBC_Brands::instance()->render_all_brands( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_all_brands() returns escaped template output.
 			array(
 				'title'              => isset( $settings['title'] ) ? (string) $settings['title'] : '',
@@ -344,6 +361,7 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 				'show_letter_counts' => isset( $settings['show_letter_counts'] ) && 'yes' === $settings['show_letter_counts'],
 				'show_search'        => isset( $settings['show_search'] ) && 'yes' === $settings['show_search'],
 				'show_arrow'         => isset( $settings['show_arrow'] ) && 'yes' === $settings['show_arrow'],
+				'index_url'          => $index_url,
 				'view_all_url'       => $url,
 				'view_all_text'      => isset( $settings['view_all_text'] ) ? (string) $settings['view_all_text'] : '',
 			)
