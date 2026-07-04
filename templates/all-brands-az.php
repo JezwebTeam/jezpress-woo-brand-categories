@@ -46,10 +46,17 @@ $jpwbc_list_cols = isset( $data['list_columns'] ) ? (int) $data['list_columns'] 
 $jpwbc_list_cols = ( $jpwbc_list_cols >= 1 && $jpwbc_list_cols <= 4 ) ? $jpwbc_list_cols : 1;
 $jpwbc_counts    = ! empty( $data['show_letter_counts'] );
 $jpwbc_search    = ! empty( $data['show_search'] );
+$jpwbc_ix_layout = ( isset( $data['index_layout'] ) && 'inline' === $data['index_layout'] ) ? 'inline' : 'grid';
 
 if ( empty( $jpwbc_groups ) ) {
 	return;
 }
+
+// Index wrapper class: a fixed N-column grid, or an inline (Myer-style) row.
+$jpwbc_index_class = 'jpwbc-az-index';
+$jpwbc_index_class .= ( 'inline' === $jpwbc_ix_layout )
+	? ' jpwbc-az-index--inline'
+	: ' jpwbc-az-index--cols-' . $jpwbc_cols;
 
 // With the brand lists hidden there is nothing on the page to jump to, so the
 // index letters render as plain text rather than in-page anchors.
@@ -89,7 +96,7 @@ $jpwbc_alphabet = array_merge( range( 'A', 'Z' ), array( '#' ) );
 	<?php endif; ?>
 
 	<?php if ( $jpwbc_index ) : ?>
-		<nav class="jpwbc-az-index jpwbc-az-index--cols-<?php echo esc_attr( (string) $jpwbc_cols ); ?>" aria-label="<?php esc_attr_e( 'Brands by letter', 'jezpress-woo-brand-categories' ); ?>">
+		<nav class="<?php echo esc_attr( $jpwbc_index_class ); ?>" aria-label="<?php esc_attr_e( 'Brands by letter', 'jezpress-woo-brand-categories' ); ?>">
 			<?php
 			foreach ( $jpwbc_alphabet as $jpwbc_letter ) :
 				$jpwbc_has = in_array( $jpwbc_letter, $jpwbc_present, true );

@@ -112,6 +112,20 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 		);
 
 		$this->add_control(
+			'index_layout',
+			array(
+				'label'     => __( 'Alphabet layout', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'default'   => 'grid',
+				'options'   => array(
+					'grid'   => __( 'Column grid', 'jezpress-woo-brand-categories' ),
+					'inline' => __( 'Inline row (boxed)', 'jezpress-woo-brand-categories' ),
+				),
+				'condition' => array( 'show_index' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
 			'columns',
 			array(
 				'label'     => __( 'Letter grid columns', 'jezpress-woo-brand-categories' ),
@@ -123,7 +137,10 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 					'5' => '5',
 					'6' => '6',
 				),
-				'condition' => array( 'show_index' => 'yes' ),
+				'condition' => array(
+					'show_index'   => 'yes',
+					'index_layout' => 'grid',
+				),
 			)
 		);
 
@@ -320,6 +337,7 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 			array(
 				'title'              => isset( $settings['title'] ) ? (string) $settings['title'] : '',
 				'show_index'         => isset( $settings['show_index'] ) && 'yes' === $settings['show_index'],
+				'index_layout'       => isset( $settings['index_layout'] ) ? (string) $settings['index_layout'] : 'grid',
 				'show_groups'        => isset( $settings['show_groups'] ) && 'yes' === $settings['show_groups'],
 				'columns'            => isset( $settings['columns'] ) ? (int) $settings['columns'] : 5,
 				'list_columns'       => isset( $settings['list_columns'] ) ? (int) $settings['list_columns'] : 1,

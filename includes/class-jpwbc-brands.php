@@ -277,6 +277,7 @@ class JPWBC_Brands {
 			array(
 				'title'              => __( 'All Brands (A-Z)', 'jezpress-woo-brand-categories' ),
 				'show_index'         => true,
+				'index_layout'       => 'grid',
 				'show_groups'        => true,
 				'columns'            => 5,
 				'list_columns'       => 1,
@@ -311,6 +312,7 @@ class JPWBC_Brands {
 			array(
 				'title'              => (string) $args['title'],
 				'show_index'         => ! empty( $args['show_index'] ),
+				'index_layout'       => ( 'inline' === $args['index_layout'] ) ? 'inline' : 'grid',
 				'show_groups'        => ! empty( $args['show_groups'] ),
 				'columns'            => $columns,
 				'list_columns'       => $list_columns,
@@ -370,6 +372,7 @@ class JPWBC_Brands {
 			array(
 				'title'              => __( 'All Brands (A-Z)', 'jezpress-woo-brand-categories' ),
 				'show_index'         => 'yes',
+				'index_layout'       => 'grid',
 				'show_groups'        => 'yes',
 				'columns'            => 5,
 				'list_columns'       => 1,
@@ -391,6 +394,7 @@ class JPWBC_Brands {
 			array(
 				'title'              => $atts['title'],
 				'show_index'         => $truthy( $atts['show_index'] ),
+				'index_layout'       => (string) $atts['index_layout'],
 				'show_groups'        => $truthy( $atts['show_groups'] ),
 				'columns'            => (int) $atts['columns'],
 				'list_columns'       => (int) $atts['list_columns'],

@@ -214,13 +214,36 @@
 	grid-template-columns: repeat( 5, minmax( 0, 1fr ) );
 	gap: 0.5em;
 	margin: 0 0 1em;
-	text-align: center;
+	text-align: left;
 }
 
 .jpwbc-az-index--cols-3 { grid-template-columns: repeat( 3, minmax( 0, 1fr ) ); }
 .jpwbc-az-index--cols-4 { grid-template-columns: repeat( 4, minmax( 0, 1fr ) ); }
 .jpwbc-az-index--cols-5 { grid-template-columns: repeat( 5, minmax( 0, 1fr ) ); }
 .jpwbc-az-index--cols-6 { grid-template-columns: repeat( 6, minmax( 0, 1fr ) ); }
+
+/* Inline row of boxed letters (Myer-style) */
+.jpwbc-az-index--inline {
+	display: flex;
+	flex-wrap: wrap;
+	grid-template-columns: none;
+	gap: 0.4em;
+	text-align: center;
+}
+
+.jpwbc-az-index--inline .jpwbc-az-index__letter {
+	min-width: 1.5em;
+	padding: 0.3em 0.55em;
+	text-align: center;
+	border: 1px solid var(--jpwbc-border);
+	border-radius: 4px;
+	line-height: 1;
+}
+
+.jpwbc-az-index--inline .jpwbc-az-index__letter:hover,
+.jpwbc-az-index--inline .jpwbc-az-index__letter:focus {
+	border-color: var(--jpwbc-teal);
+}
 
 .jpwbc-az-index__letter {
 	font-weight: 600;

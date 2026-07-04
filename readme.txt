@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.6.0 =
+* New (All Brands A-Z): "Alphabet layout" option — choose between the column grid and an inline row of boxed letters (like the Myer brands page).
+
 = 1.5.0 =
 * New (All Brands A-Z): a full brands-directory layout — put the brand names under each letter into 1-4 columns, show a per-letter count (e.g. "C (104)"), and add a live brand search box. Ideal for a dedicated "Brands" page.
 * New: "Brand link hover colour" control on the Trending Brands and All Brands (A-Z) widgets.
@@ -127,6 +130,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.6.0 =
+Adds an "Alphabet layout" option to the All Brands (A-Z) widget: column grid or an inline row of boxed letters.
 
 = 1.5.0 =
 Adds a full brands-directory layout (multi-column lists, per-letter counts, brand search) and a link hover colour control.
