@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,10 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.5.0 =
+* New (All Brands A-Z): a full brands-directory layout — put the brand names under each letter into 1-4 columns, show a per-letter count (e.g. "C (104)"), and add a live brand search box. Ideal for a dedicated "Brands" page.
+* New: "Brand link hover colour" control on the Trending Brands and All Brands (A-Z) widgets.
+
 = 1.4.0 =
 * New: full Typography control (font family, size, weight, line-height, transform) on the Trending Brands and All Brands (A-Z) widgets — for the heading, the letters, and the brand lists. Replaces the previous font-size-only sliders.
 * Change: the Trending Brands list no longer shows bullet markers (matches a clean brand list); the same applies to the per-letter brand lists.
@@ -123,6 +127,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.5.0 =
+Adds a full brands-directory layout (multi-column lists, per-letter counts, brand search) and a link hover colour control.
 
 = 1.4.0 =
 Adds full Typography (font family + size) controls to the brand widgets and removes the Trending list bullets. If you set a font size in 1.3.0, re-set it under the new Typography control.

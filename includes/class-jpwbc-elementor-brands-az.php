@@ -139,6 +139,45 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 		);
 
 		$this->add_control(
+			'list_columns',
+			array(
+				'label'       => __( 'Brand list columns', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'Columns of brand names under each letter. Use 3-4 for a full-width brands page.', 'jezpress-woo-brand-categories' ),
+				'type'        => \Elementor\Controls_Manager::SELECT,
+				'default'     => '1',
+				'options'     => array(
+					'1' => '1',
+					'2' => '2',
+					'3' => '3',
+					'4' => '4',
+				),
+				'condition'   => array( 'show_groups' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'show_letter_counts',
+			array(
+				'label'        => __( 'Show brand count per letter', 'jezpress-woo-brand-categories' ),
+				'description'  => __( 'e.g. "C (104)".', 'jezpress-woo-brand-categories' ),
+				'type'         => \Elementor\Controls_Manager::SWITCHER,
+				'default'      => '',
+				'return_value' => 'yes',
+				'condition'    => array( 'show_groups' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'show_search',
+			array(
+				'label'        => __( 'Show brand search box', 'jezpress-woo-brand-categories' ),
+				'type'         => \Elementor\Controls_Manager::SWITCHER,
+				'default'      => '',
+				'return_value' => 'yes',
+			)
+		);
+
+		$this->add_control(
 			'show_arrow',
 			array(
 				'label'        => __( 'Show heading arrow', 'jezpress-woo-brand-categories' ),
@@ -247,6 +286,20 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'link_hover_color',
+			array(
+				'label'     => __( 'Brand link hover colour', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-az-group__item a:hover'   => 'color: {{VALUE}};',
+					'{{WRAPPER}} .jpwbc-az-group__item a:focus'   => 'color: {{VALUE}};',
+					'{{WRAPPER}} .jpwbc-az-index__letter:hover'   => 'color: {{VALUE}};',
+					'{{WRAPPER}} .jpwbc-az-index__letter:focus'   => 'color: {{VALUE}};',
+				),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
@@ -265,13 +318,16 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 
 		echo JPWBC_Brands::instance()->render_all_brands( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_all_brands() returns escaped template output.
 			array(
-				'title'         => isset( $settings['title'] ) ? (string) $settings['title'] : '',
-				'show_index'    => isset( $settings['show_index'] ) && 'yes' === $settings['show_index'],
-				'show_groups'   => isset( $settings['show_groups'] ) && 'yes' === $settings['show_groups'],
-				'columns'       => isset( $settings['columns'] ) ? (int) $settings['columns'] : 5,
-				'show_arrow'    => isset( $settings['show_arrow'] ) && 'yes' === $settings['show_arrow'],
-				'view_all_url'  => $url,
-				'view_all_text' => isset( $settings['view_all_text'] ) ? (string) $settings['view_all_text'] : '',
+				'title'              => isset( $settings['title'] ) ? (string) $settings['title'] : '',
+				'show_index'         => isset( $settings['show_index'] ) && 'yes' === $settings['show_index'],
+				'show_groups'        => isset( $settings['show_groups'] ) && 'yes' === $settings['show_groups'],
+				'columns'            => isset( $settings['columns'] ) ? (int) $settings['columns'] : 5,
+				'list_columns'       => isset( $settings['list_columns'] ) ? (int) $settings['list_columns'] : 1,
+				'show_letter_counts' => isset( $settings['show_letter_counts'] ) && 'yes' === $settings['show_letter_counts'],
+				'show_search'        => isset( $settings['show_search'] ) && 'yes' === $settings['show_search'],
+				'show_arrow'         => isset( $settings['show_arrow'] ) && 'yes' === $settings['show_arrow'],
+				'view_all_url'       => $url,
+				'view_all_text'      => isset( $settings['view_all_text'] ) ? (string) $settings['view_all_text'] : '',
 			)
 		);
 	}

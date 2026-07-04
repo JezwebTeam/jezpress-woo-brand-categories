@@ -254,8 +254,44 @@
 	border-bottom: 1px solid var(--jpwbc-border);
 }
 
+.jpwbc-az-group__count {
+	font-weight: 400;
+	color: #6b6b70;
+	margin-left: 0.25em;
+}
+
+/* Brand list columns (for a full-width brands directory) */
+.jpwbc-az-group__list--cols-2 { display: grid; grid-template-columns: repeat( 2, minmax( 0, 1fr ) ); gap: 0 1.5em; }
+.jpwbc-az-group__list--cols-3 { display: grid; grid-template-columns: repeat( 3, minmax( 0, 1fr ) ); gap: 0 1.5em; }
+.jpwbc-az-group__list--cols-4 { display: grid; grid-template-columns: repeat( 4, minmax( 0, 1fr ) ); gap: 0 1.5em; }
+
+@media ( max-width: 782px ) {
+	.jpwbc-az-group__list--cols-3,
+	.jpwbc-az-group__list--cols-4 { grid-template-columns: repeat( 2, minmax( 0, 1fr ) ); }
+}
+
+@media ( max-width: 480px ) {
+	.jpwbc-az-group__list--cols-2,
+	.jpwbc-az-group__list--cols-3,
+	.jpwbc-az-group__list--cols-4 { grid-template-columns: 1fr; }
+}
+
 .jpwbc-az-group__item {
 	padding: 0.22em 0;
+}
+
+/* Brand search box */
+.jpwbc-allbrands__search {
+	margin: 0 0 1em;
+}
+
+.jpwbc-allbrands__search .jpwbc-brandfilter {
+	width: 100%;
+	max-width: 420px;
+	padding: 0.5em 0.7em;
+	border: 1px solid var(--jpwbc-border);
+	border-radius: 4px;
+	box-sizing: border-box;
 }
 
 .jpwbc-allbrands__viewall {

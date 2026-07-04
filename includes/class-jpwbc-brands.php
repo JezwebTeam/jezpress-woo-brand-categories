@@ -181,16 +181,20 @@ class JPWBC_Brands {
 			if ( ! $term instanceof \WP_Term ) {
 				continue;
 			}
+			$link = get_term_link( $term );
+			if ( is_wp_error( $link ) ) {
+				// Skip un-linkable brands so per-letter counts match what renders.
+				continue;
+			}
 			$first = strtoupper( mb_substr( $term->name, 0, 1 ) );
 			if ( ! preg_match( '/^[A-Z]$/', $first ) ) {
 				$first = '#';
 			}
-			$link = get_term_link( $term );
 			$groups[ $first ][] = array(
 				'term_id' => (int) $term->term_id,
 				'name'    => $term->name,
 				'slug'    => $term->slug,
-				'url'     => is_wp_error( $link ) ? '' : $link,
+				'url'     => $link,
 			);
 		}
 
@@ -271,13 +275,16 @@ class JPWBC_Brands {
 
 		$args = array_merge(
 			array(
-				'title'         => __( 'All Brands (A-Z)', 'jezpress-woo-brand-categories' ),
-				'show_index'    => true,
-				'show_groups'   => true,
-				'columns'       => 5,
-				'show_arrow'    => true,
-				'view_all_url'  => '',
-				'view_all_text' => __( 'View all', 'jezpress-woo-brand-categories' ),
+				'title'              => __( 'All Brands (A-Z)', 'jezpress-woo-brand-categories' ),
+				'show_index'         => true,
+				'show_groups'        => true,
+				'columns'            => 5,
+				'list_columns'       => 1,
+				'show_letter_counts' => false,
+				'show_search'        => false,
+				'show_arrow'         => true,
+				'view_all_url'       => '',
+				'view_all_text'      => __( 'View all', 'jezpress-woo-brand-categories' ),
 			),
 			$args
 		);
@@ -296,18 +303,24 @@ class JPWBC_Brands {
 		$columns = (int) $args['columns'];
 		$columns = ( $columns >= 3 && $columns <= 6 ) ? $columns : 5;
 
+		$list_columns = (int) $args['list_columns'];
+		$list_columns = ( $list_columns >= 1 && $list_columns <= 4 ) ? $list_columns : 1;
+
 		return jpwbc_get_template(
 			'all-brands-az.php',
 			array(
-				'title'         => (string) $args['title'],
-				'show_index'    => ! empty( $args['show_index'] ),
-				'show_groups'   => ! empty( $args['show_groups'] ),
-				'columns'       => $columns,
-				'show_arrow'    => ! empty( $args['show_arrow'] ),
-				'view_all_url'  => esc_url_raw( (string) $args['view_all_url'] ),
-				'view_all_text' => (string) $args['view_all_text'],
-				'groups'        => $groups,
-				'instance'      => $instance,
+				'title'              => (string) $args['title'],
+				'show_index'         => ! empty( $args['show_index'] ),
+				'show_groups'        => ! empty( $args['show_groups'] ),
+				'columns'            => $columns,
+				'list_columns'       => $list_columns,
+				'show_letter_counts' => ! empty( $args['show_letter_counts'] ),
+				'show_search'        => ! empty( $args['show_search'] ),
+				'show_arrow'         => ! empty( $args['show_arrow'] ),
+				'view_all_url'       => esc_url_raw( (string) $args['view_all_url'] ),
+				'view_all_text'      => (string) $args['view_all_text'],
+				'groups'             => $groups,
+				'instance'           => $instance,
 			)
 		);
 	}
@@ -355,27 +368,37 @@ class JPWBC_Brands {
 	public function shortcode_all_brands( $atts ): string {
 		$atts = shortcode_atts(
 			array(
-				'title'         => __( 'All Brands (A-Z)', 'jezpress-woo-brand-categories' ),
-				'show_index'    => 'yes',
-				'show_groups'   => 'yes',
-				'columns'       => 5,
-				'show_arrow'    => 'yes',
-				'view_all_url'  => '',
-				'view_all_text' => __( 'View all', 'jezpress-woo-brand-categories' ),
+				'title'              => __( 'All Brands (A-Z)', 'jezpress-woo-brand-categories' ),
+				'show_index'         => 'yes',
+				'show_groups'        => 'yes',
+				'columns'            => 5,
+				'list_columns'       => 1,
+				'show_letter_counts' => 'no',
+				'show_search'        => 'no',
+				'show_arrow'         => 'yes',
+				'view_all_url'       => '',
+				'view_all_text'      => __( 'View all', 'jezpress-woo-brand-categories' ),
 			),
 			is_array( $atts ) ? $atts : array(),
 			'jpwbc_all_brands'
 		);
 
+		$truthy = static function ( $v ): bool {
+			return 'yes' === $v || '1' === (string) $v || 'true' === $v;
+		};
+
 		return $this->render_all_brands(
 			array(
-				'title'         => $atts['title'],
-				'show_index'    => 'yes' === $atts['show_index'] || '1' === (string) $atts['show_index'],
-				'show_groups'   => 'yes' === $atts['show_groups'] || '1' === (string) $atts['show_groups'],
-				'columns'       => (int) $atts['columns'],
-				'show_arrow'    => 'yes' === $atts['show_arrow'] || '1' === (string) $atts['show_arrow'],
-				'view_all_url'  => $atts['view_all_url'],
-				'view_all_text' => $atts['view_all_text'],
+				'title'              => $atts['title'],
+				'show_index'         => $truthy( $atts['show_index'] ),
+				'show_groups'        => $truthy( $atts['show_groups'] ),
+				'columns'            => (int) $atts['columns'],
+				'list_columns'       => (int) $atts['list_columns'],
+				'show_letter_counts' => $truthy( $atts['show_letter_counts'] ),
+				'show_search'        => $truthy( $atts['show_search'] ),
+				'show_arrow'         => $truthy( $atts['show_arrow'] ),
+				'view_all_url'       => $atts['view_all_url'],
+				'view_all_text'      => $atts['view_all_text'],
 			)
 		);
 	}

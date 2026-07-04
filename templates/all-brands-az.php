@@ -11,13 +11,18 @@
  * @since   1.2.0
  *
  * @var array $data {
- *     @type string $title         Heading.
- *     @type bool   $show_index    Show the A-Z jump bar.
- *     @type bool   $show_arrow    Show arrow after the heading.
- *     @type string $view_all_url  Optional "View all" URL.
- *     @type string $view_all_text "View all" label.
- *     @type array  $groups        Letter => [ {term_id,name,slug,url}, ... ].
- *     @type int    $instance      Unique instance id for anchor ids.
+ *     @type string $title              Heading.
+ *     @type bool   $show_index         Show the A-Z letter grid.
+ *     @type int    $columns            A-Z letter-grid columns (3-6).
+ *     @type bool   $show_groups        Show the per-letter brand lists.
+ *     @type int    $list_columns       Brand-list columns under each letter (1-4).
+ *     @type bool   $show_letter_counts Show a "(N)" count per letter.
+ *     @type bool   $show_search        Show the brand search box.
+ *     @type bool   $show_arrow         Show arrow after the heading.
+ *     @type string $view_all_url       Optional "View all" URL.
+ *     @type string $view_all_text      "View all" label.
+ *     @type array  $groups             Letter => [ {term_id,name,slug,url}, ... ].
+ *     @type int    $instance           Unique instance id for anchor ids.
  * }
  */
 
@@ -37,6 +42,10 @@ $jpwbc_inst     = isset( $data['instance'] ) ? (int) $data['instance'] : 1;
 $jpwbc_groups_on = ! isset( $data['show_groups'] ) || ! empty( $data['show_groups'] );
 $jpwbc_cols      = isset( $data['columns'] ) ? (int) $data['columns'] : 5;
 $jpwbc_cols      = ( $jpwbc_cols >= 3 && $jpwbc_cols <= 6 ) ? $jpwbc_cols : 5;
+$jpwbc_list_cols = isset( $data['list_columns'] ) ? (int) $data['list_columns'] : 1;
+$jpwbc_list_cols = ( $jpwbc_list_cols >= 1 && $jpwbc_list_cols <= 4 ) ? $jpwbc_list_cols : 1;
+$jpwbc_counts    = ! empty( $data['show_letter_counts'] );
+$jpwbc_search    = ! empty( $data['show_search'] );
 
 if ( empty( $jpwbc_groups ) ) {
 	return;
@@ -71,6 +80,14 @@ $jpwbc_alphabet = array_merge( range( 'A', 'Z' ), array( '#' ) );
 		</h3>
 	<?php endif; ?>
 
+	<?php if ( $jpwbc_search ) : ?>
+		<div class="jpwbc-allbrands__search">
+			<label class="screen-reader-text" for="jpwbc-brandfilter-<?php echo esc_attr( (string) $jpwbc_inst ); ?>"><?php esc_html_e( 'Search for a brand', 'jezpress-woo-brand-categories' ); ?></label>
+			<input type="search" id="jpwbc-brandfilter-<?php echo esc_attr( (string) $jpwbc_inst ); ?>" class="jpwbc-brandfilter" autocomplete="off"
+				placeholder="<?php esc_attr_e( 'Search for a brand…', 'jezpress-woo-brand-categories' ); ?>">
+		</div>
+	<?php endif; ?>
+
 	<?php if ( $jpwbc_index ) : ?>
 		<nav class="jpwbc-az-index jpwbc-az-index--cols-<?php echo esc_attr( (string) $jpwbc_cols ); ?>" aria-label="<?php esc_attr_e( 'Brands by letter', 'jezpress-woo-brand-categories' ); ?>">
 			<?php
@@ -92,8 +109,13 @@ $jpwbc_alphabet = array_merge( range( 'A', 'Z' ), array( '#' ) );
 		<div class="jpwbc-az-groups">
 			<?php foreach ( $jpwbc_groups as $jpwbc_letter => $jpwbc_brands ) : ?>
 				<section class="jpwbc-az-group" id="<?php echo esc_attr( $jpwbc_anchor( (string) $jpwbc_letter, $jpwbc_inst ) ); ?>">
-					<h4 class="jpwbc-az-group__letter"><?php echo esc_html( (string) $jpwbc_letter ); ?></h4>
-					<ul class="jpwbc-az-group__list">
+					<h4 class="jpwbc-az-group__letter">
+						<?php echo esc_html( (string) $jpwbc_letter ); ?>
+						<?php if ( $jpwbc_counts ) : ?>
+							<span class="jpwbc-az-group__count">(<?php echo esc_html( (string) count( $jpwbc_brands ) ); ?>)</span>
+						<?php endif; ?>
+					</h4>
+					<ul class="jpwbc-az-group__list jpwbc-az-group__list--cols-<?php echo esc_attr( (string) $jpwbc_list_cols ); ?>">
 						<?php foreach ( $jpwbc_brands as $jpwbc_brand ) : ?>
 							<?php if ( '' === (string) $jpwbc_brand['url'] ) { continue; } ?>
 							<li class="jpwbc-az-group__item">

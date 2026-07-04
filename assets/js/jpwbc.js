@@ -142,6 +142,33 @@
 		}
 	}
 
+	// Live brand filter for the All Brands (A-Z) directory: hides non-matching
+	// brands and any letter section left with no visible brands.
+	function bindBrandFilter( root ) {
+		var input = root.querySelector( '.jpwbc-brandfilter' );
+		if ( ! input ) {
+			return;
+		}
+		var groups = Array.prototype.slice.call( root.querySelectorAll( '.jpwbc-az-group' ) );
+		input.addEventListener( 'input', function () {
+			var q = input.value.trim().toLowerCase();
+			groups.forEach( function ( group ) {
+				var items = group.querySelectorAll( '.jpwbc-az-group__item' );
+				var visible = 0;
+				Array.prototype.forEach.call( items, function ( item ) {
+					var link = item.querySelector( 'a' );
+					var name = link ? link.textContent.trim().toLowerCase() : '';
+					var match = '' === q || name.indexOf( q ) !== -1;
+					item.style.display = match ? '' : 'none';
+					if ( match ) {
+						visible++;
+					}
+				} );
+				group.style.display = ( 0 === visible ) ? 'none' : '';
+			} );
+		} );
+	}
+
 	ready( function () {
 		var roots = document.querySelectorAll( '.jpwbc-brand-cats' );
 		Array.prototype.forEach.call( roots, function ( root ) {
@@ -150,6 +177,7 @@
 			}
 			bindToggles( root );
 			bindSearch( root );
+			bindBrandFilter( root );
 		} );
 
 		document.addEventListener( 'click', trackClick, true );

@@ -172,6 +172,18 @@ class JPWBC_Elementor_Trending extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'link_hover_color',
+			array(
+				'label'     => __( 'Brand link hover colour', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-trending__item a:hover' => 'color: {{VALUE}};',
+					'{{WRAPPER}} .jpwbc-trending__item a:focus' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
