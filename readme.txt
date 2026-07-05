@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.13.0
+Stable tag: 1.14.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,11 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.14.0 =
+* New: dynamic attribute facets (Colour, Style, …) in the Brand Filter Bar. The plugin indexes the store's *custom* (non-taxonomy) variation attributes — including those written by an API sync — into filterable, per-brand facets with product counts, without changing the source data. Each brand shows only the attributes its own products use. Multi-select, query-param based, and noindexed like the other filters.
+* New: attribute index rebuild control under JezPress > Brand Categories > Cache (also on product save, a background sweep, and `wp jpwbc-attr-index rebuild`) so the facets self-heal after a sync.
+* The Brand Filter Bar widget gains "Show attribute filters" + an optional "Limit to attributes" allowlist; `[jpwbc_brand_filter]` gains show_attributes and attributes atts.
 
 = 1.13.0 =
 * New: "Brand Filter Bar" Elementor widget + `[jpwbc_brand_filter]` shortcode — a Myer/Radley-style filter + sort bar for brand archives. Category (via the clean combo URLs, indexable), Price (min/max, applied to the archive product query), and Sort by (Recommended / Price / Recently Added / Most Popular, using WooCommerce's native ordering). Query-param based (reload, no AJAX) so it's cache-friendly; price/sort-filtered views are set to noindex,follow. Works without JavaScript; the Sort control auto-submits when JS is on.
@@ -152,6 +157,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.14.0 =
+Adds dynamic Colour/Style attribute facets to the Brand Filter Bar (built from custom variation attributes via a self-healing index). After updating, rebuild the index under Brand Categories > Cache.
 
 = 1.13.0 =
 Adds a "Brand Filter Bar" widget/shortcode (Category + Price + Sort) for brand archives, query-param based with noindex on filtered views.

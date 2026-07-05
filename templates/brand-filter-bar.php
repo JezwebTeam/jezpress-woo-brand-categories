@@ -47,6 +47,7 @@ $jpwbc_min      = isset( $data['current_min'] ) && null !== $data['current_min']
 $jpwbc_max      = isset( $data['current_max'] ) && null !== $data['current_max'] ? (float) $data['current_max'] : null;
 $jpwbc_sort     = isset( $data['current_sort'] ) ? (string) $data['current_sort'] : '';
 $jpwbc_sorts    = isset( $data['sort_options'] ) && is_array( $data['sort_options'] ) ? $data['sort_options'] : array();
+$jpwbc_facets   = isset( $data['facets'] ) && is_array( $data['facets'] ) ? $data['facets'] : array();
 $jpwbc_show_cat = ! isset( $data['show_category'] ) || ! empty( $data['show_category'] );
 $jpwbc_show_pr  = ! isset( $data['show_price'] ) || ! empty( $data['show_price'] );
 $jpwbc_show_srt = ! isset( $data['show_sort'] ) || ! empty( $data['show_sort'] );
@@ -68,9 +69,27 @@ foreach ( $jpwbc_cats as $jpwbc_c ) {
 	}
 }
 
-// Order-preserving hidden fields for the price/sort forms.
-$jpwbc_hidden = static function ( array $pairs ): void {
-	foreach ( $pairs as $k => $v ) {
+// Emit the preserved filter params ($preserve) as hidden inputs so each GET form
+// keeps the other active filters. $exclude lists param keys the form owns itself
+// (its inputs already carry those). Array values (facets) emit name[] fields.
+$jpwbc_hidden = static function ( array $exclude = array() ) use ( $jpwbc_preserve ): void {
+	foreach ( $jpwbc_preserve as $k => $v ) {
+		if ( in_array( (string) $k, $exclude, true ) ) {
+			continue;
+		}
+		if ( is_array( $v ) ) {
+			foreach ( $v as $item ) {
+				if ( '' === (string) $item ) {
+					continue;
+				}
+				printf(
+					'<input type="hidden" name="%s" value="%s">',
+					esc_attr( (string) $k . '[]' ),
+					esc_attr( (string) $item )
+				);
+			}
+			continue;
+		}
 		if ( '' === (string) $v ) {
 			continue;
 		}
@@ -82,7 +101,7 @@ $jpwbc_hidden = static function ( array $pairs ): void {
 	}
 };
 
-if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt ) {
+if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt && empty( $jpwbc_facets ) ) {
 	return;
 }
 ?>
@@ -125,6 +144,57 @@ if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt ) {
 		</details>
 	<?php endif; ?>
 
+	<?php foreach ( $jpwbc_facets as $jpwbc_facet ) : ?>
+		<?php
+		$jpwbc_f_key    = isset( $jpwbc_facet['key'] ) ? (string) $jpwbc_facet['key'] : '';
+		$jpwbc_f_label  = isset( $jpwbc_facet['label'] ) ? (string) $jpwbc_facet['label'] : '';
+		$jpwbc_f_values = isset( $jpwbc_facet['values'] ) && is_array( $jpwbc_facet['values'] ) ? $jpwbc_facet['values'] : array();
+		if ( '' === $jpwbc_f_key || empty( $jpwbc_f_values ) ) {
+			continue;
+		}
+		$jpwbc_f_param    = 'jpwbc_af_' . $jpwbc_f_key;
+		$jpwbc_f_selcount = 0;
+		foreach ( $jpwbc_f_values as $jpwbc_v ) {
+			if ( ! empty( $jpwbc_v['selected'] ) ) {
+				++$jpwbc_f_selcount;
+			}
+		}
+		?>
+		<details class="jpwbc-filter jpwbc-filter--attr">
+			<summary class="jpwbc-filter__toggle">
+				<span class="jpwbc-filter__label"><?php echo esc_html( $jpwbc_f_label ); ?></span>
+				<?php if ( $jpwbc_f_selcount > 0 ) : ?>
+					<span class="jpwbc-filter__value"><?php echo esc_html( (string) (int) $jpwbc_f_selcount ); ?></span>
+				<?php endif; ?>
+			</summary>
+			<div class="jpwbc-filter__panel">
+				<form class="jpwbc-attr-form" method="get" action="<?php echo esc_url( $jpwbc_base ); ?>">
+					<ul class="jpwbc-filter__list">
+						<?php foreach ( $jpwbc_f_values as $jpwbc_v ) : ?>
+							<?php
+							$jpwbc_v_slug = isset( $jpwbc_v['slug'] ) ? (string) $jpwbc_v['slug'] : '';
+							if ( '' === $jpwbc_v_slug ) {
+								continue;
+							}
+							?>
+							<li>
+								<label class="jpwbc-filter__check">
+									<input type="checkbox" name="<?php echo esc_attr( $jpwbc_f_param ); ?>[]"
+										value="<?php echo esc_attr( $jpwbc_v_slug ); ?>"
+										<?php checked( ! empty( $jpwbc_v['selected'] ) ); ?>>
+									<span class="jpwbc-filter__opt-name"><?php echo esc_html( (string) $jpwbc_v['name'] ); ?></span>
+									<span class="jpwbc-filter__opt-count"><?php echo esc_html( (string) (int) $jpwbc_v['count'] ); ?></span>
+								</label>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+					<?php $jpwbc_hidden( array( $jpwbc_f_param ) ); ?>
+					<button type="submit" class="jpwbc-filter__apply"><?php esc_html_e( 'Apply', 'jezpress-woo-brand-categories' ); ?></button>
+				</form>
+			</div>
+		</details>
+	<?php endforeach; ?>
+
 	<?php if ( $jpwbc_show_pr ) : ?>
 		<details class="jpwbc-filter jpwbc-filter--price">
 			<summary class="jpwbc-filter__toggle">
@@ -161,7 +231,7 @@ if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt ) {
 								value="<?php echo null !== $jpwbc_max ? esc_attr( (string) (int) $jpwbc_max ) : ''; ?>">
 						</label>
 					</div>
-					<?php $jpwbc_hidden( array( 'orderby' => $jpwbc_sort ) ); ?>
+					<?php $jpwbc_hidden( array( 'jpwbc_min_price', 'jpwbc_max_price' ) ); ?>
 					<button type="submit" class="jpwbc-filter__apply"><?php esc_html_e( 'Apply', 'jezpress-woo-brand-categories' ); ?></button>
 				</form>
 			</div>
@@ -181,19 +251,12 @@ if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt ) {
 					<?php endforeach; ?>
 				</select>
 			</label>
-			<?php
-			$jpwbc_hidden(
-				array(
-					'jpwbc_min_price' => null !== $jpwbc_min ? (string) (int) $jpwbc_min : '',
-					'jpwbc_max_price' => null !== $jpwbc_max ? (string) (int) $jpwbc_max : '',
-				)
-			);
-			?>
+			<?php $jpwbc_hidden( array( 'orderby' ) ); ?>
 			<button type="submit" class="jpwbc-filter__apply jpwbc-filter__apply--sort"><?php esc_html_e( 'Go', 'jezpress-woo-brand-categories' ); ?></button>
 		</form>
 	<?php endif; ?>
 
-	<?php if ( ! empty( $data['is_filtered'] ) ) : ?>
+	<?php if ( ! empty( $jpwbc_preserve ) ) : ?>
 		<a class="jpwbc-filter__clear" href="<?php echo esc_url( $jpwbc_base ); ?>"><?php esc_html_e( 'Clear filters', 'jezpress-woo-brand-categories' ); ?></a>
 	<?php endif; ?>
 

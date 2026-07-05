@@ -133,6 +133,28 @@ class JPWBC_Elementor_Brand_Filter extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'show_attributes',
+			array(
+				'label'        => __( 'Show attribute filters', 'jezpress-woo-brand-categories' ),
+				'description'  => __( 'Colour / Style / … facets built from the products in the brand (needs the attribute index — rebuild it under JezPress > Brand Categories > Cache).', 'jezpress-woo-brand-categories' ),
+				'type'         => \Elementor\Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'return_value' => 'yes',
+			)
+		);
+
+		$this->add_control(
+			'attributes',
+			array(
+				'label'       => __( 'Limit to attributes (optional)', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'Comma-separated attribute names to show, e.g. "Colour, Style". Leave blank to show all indexed attributes.', 'jezpress-woo-brand-categories' ),
+				'type'        => \Elementor\Controls_Manager::TEXT,
+				'default'     => '',
+				'condition'   => array( 'show_attributes' => 'yes' ),
+			)
+		);
+
 		$this->add_responsive_control(
 			'align',
 			array(
@@ -263,9 +285,11 @@ class JPWBC_Elementor_Brand_Filter extends \Elementor\Widget_Base {
 		echo $filter->render_filter_bar( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_filter_bar() returns escaped template output.
 			array(
 				'brand'         => $brand,
-				'show_category' => isset( $settings['show_category'] ) && 'yes' === $settings['show_category'],
-				'show_price'    => isset( $settings['show_price'] ) && 'yes' === $settings['show_price'],
-				'show_sort'     => isset( $settings['show_sort'] ) && 'yes' === $settings['show_sort'],
+				'show_category'   => isset( $settings['show_category'] ) && 'yes' === $settings['show_category'],
+				'show_price'      => isset( $settings['show_price'] ) && 'yes' === $settings['show_price'],
+				'show_sort'       => isset( $settings['show_sort'] ) && 'yes' === $settings['show_sort'],
+				'show_attributes' => isset( $settings['show_attributes'] ) && 'yes' === $settings['show_attributes'],
+				'attributes'      => isset( $settings['attributes'] ) ? (string) $settings['attributes'] : '',
 			)
 		);
 	}

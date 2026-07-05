@@ -3,7 +3,7 @@
  * Plugin Name: JezPress Woo Brand Categories
  * Plugin URI: https://jezpress.com/plugins/jezpress-woo-brand-categories
  * Description: In-brand product-category navigation and clean brand+category URLs for WooCommerce brand archives.
- * Version: 1.13.0
+ * Version: 1.14.0
  * Author: Jezweb
  * Author URI: https://jezpress.com
  * License: GPL-2.0+
@@ -76,7 +76,7 @@ if ( version_compare( PHP_VERSION, '8.1.0', '<' ) ) {
  *
  * @since 1.0.0
  */
-define( 'JPWBC_VERSION', '1.13.0' );
+define( 'JPWBC_VERSION', '1.14.0' );
 define( 'JPWBC_PLUGIN_FILE', __FILE__ );
 define( 'JPWBC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JPWBC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -208,6 +208,9 @@ function jpwbc_deactivate(): void {
 		wp_unschedule_event( $timestamp, 'jpwbc_license_check' );
 	}
 
+	// Clear any pending attribute-index backfill runs.
+	wp_clear_scheduled_hook( 'jpwbc_af_reindex' );
+
 	// Flush rewrite rules
 	flush_rewrite_rules();
 }
@@ -336,6 +339,7 @@ function jpwbc_include_files(): void {
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-seo-rankmath.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-brands.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-filter.php';
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-attr-index.php';
 }
 
 /**
@@ -416,7 +420,11 @@ function jpwbc_init(): void {
 			$brands = new JPWBC_Brands();
 			$brands->register_hooks();
 
-			// Brand archive filter bar (Category + Price + Sort).
+			// Custom-attribute facet indexer (Colour/Style/… → filterable taxonomies).
+			$attr_index = new JPWBC_Attr_Index( $settings );
+			$attr_index->register_hooks();
+
+			// Brand archive filter bar (Category + Price + Sort + attribute facets).
 			$filter = new JPWBC_Filter( $query, $rewrites, $settings );
 			$filter->register_hooks();
 

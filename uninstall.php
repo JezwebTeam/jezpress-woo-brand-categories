@@ -24,6 +24,9 @@ $options = array(
 	'jpwbc_settings',
 	'jpwbc_cache_version',
 	'jpwbc_cache_rebuilt',
+	// Attribute-facet indexer (1.14.0+).
+	'jpwbc_af_attributes',
+	'jpwbc_af_index_state',
 	// Legacy keys from older builds (harmless if absent).
 	'jpwbc_license_key',
 	'jpwbc_license_data',
@@ -51,6 +54,37 @@ $wpdb->query(
 $timestamp = wp_next_scheduled( 'jpwbc_license_check' );
 if ( false !== $timestamp ) {
 	wp_unschedule_event( $timestamp, 'jpwbc_license_check' );
+}
+wp_clear_scheduled_hook( 'jpwbc_af_reindex' );
+
+/**
+ * Delete the derived attribute-facet taxonomies (jpwbc_af_*): their terms, term
+ * meta and object relationships. The taxonomies aren't registered at uninstall,
+ * so this is a direct table cleanup.
+ */
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+$jpwbc_af_rows = $wpdb->get_results(
+	$wpdb->prepare(
+		"SELECT term_taxonomy_id, term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy LIKE %s",
+		$wpdb->esc_like( 'jpwbc_af_' ) . '%'
+	)
+);
+if ( ! empty( $jpwbc_af_rows ) ) {
+	$jpwbc_af_tt = array_map( 'intval', wp_list_pluck( $jpwbc_af_rows, 'term_taxonomy_id' ) );
+	$jpwbc_af_t  = array_map( 'intval', wp_list_pluck( $jpwbc_af_rows, 'term_id' ) );
+	$jpwbc_tt_in = implode( ',', $jpwbc_af_tt );
+	$jpwbc_t_in  = implode( ',', $jpwbc_af_t );
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- IN lists are intval-cast integers.
+	if ( '' !== $jpwbc_tt_in ) {
+		$wpdb->query( "DELETE FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ($jpwbc_tt_in)" );
+		$wpdb->query( "DELETE FROM {$wpdb->term_taxonomy} WHERE term_taxonomy_id IN ($jpwbc_tt_in)" );
+	}
+	if ( '' !== $jpwbc_t_in ) {
+		$wpdb->query( "DELETE FROM {$wpdb->terms} WHERE term_id IN ($jpwbc_t_in)" );
+		$wpdb->query( "DELETE FROM {$wpdb->termmeta} WHERE term_id IN ($jpwbc_t_in)" );
+	}
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 }
 
 /**

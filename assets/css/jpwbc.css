@@ -438,6 +438,28 @@
 	font-size: 0.85em;
 }
 
+/* Attribute facet checkboxes. */
+.jpwbc-filter__check {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.35em 0.5em;
+	cursor: pointer;
+	border-radius: 4px;
+}
+
+.jpwbc-filter__check:hover {
+	background: var(--jpwbc-grey);
+}
+
+.jpwbc-filter__check .jpwbc-filter__opt-name {
+	flex: 1 1 auto;
+}
+
+.jpwbc-attr-form .jpwbc-filter__apply {
+	margin-top: 0.5em;
+}
+
 /* Price form. */
 .jpwbc-price-fields {
 	display: flex;

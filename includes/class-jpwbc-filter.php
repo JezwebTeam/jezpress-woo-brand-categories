@@ -314,10 +314,12 @@ class JPWBC_Filter {
 	public function shortcode( $atts ): string {
 		$atts = shortcode_atts(
 			array(
-				'brand'         => '',
-				'show_category' => 'yes',
-				'show_price'    => 'yes',
-				'show_sort'     => 'yes',
+				'brand'           => '',
+				'show_category'   => 'yes',
+				'show_price'      => 'yes',
+				'show_sort'       => 'yes',
+				'show_attributes' => 'yes',
+				'attributes'      => '',
 			),
 			is_array( $atts ) ? $atts : array(),
 			'jpwbc_brand_filter'
@@ -329,10 +331,12 @@ class JPWBC_Filter {
 
 		return $this->render_filter_bar(
 			array(
-				'brand'         => is_string( $atts['brand'] ) ? $atts['brand'] : '',
-				'show_category' => $truthy( $atts['show_category'] ),
-				'show_price'    => $truthy( $atts['show_price'] ),
-				'show_sort'     => $truthy( $atts['show_sort'] ),
+				'brand'           => is_string( $atts['brand'] ) ? $atts['brand'] : '',
+				'show_category'   => $truthy( $atts['show_category'] ),
+				'show_price'      => $truthy( $atts['show_price'] ),
+				'show_sort'       => $truthy( $atts['show_sort'] ),
+				'show_attributes' => $truthy( $atts['show_attributes'] ),
+				'attributes'      => is_string( $atts['attributes'] ) ? $atts['attributes'] : '',
 			)
 		);
 	}
@@ -369,7 +373,7 @@ class JPWBC_Filter {
 		$max     = $this->current_max();
 		$orderby = $this->current_orderby();
 
-		// Params to carry across category links (price + sort), so switching category keeps them.
+		// Params to carry across category links (price + sort + facets), so switching category keeps them.
 		$preserve = array();
 		if ( null !== $min ) {
 			$preserve['jpwbc_min_price'] = $min;
@@ -379,6 +383,24 @@ class JPWBC_Filter {
 		}
 		if ( '' !== $orderby ) {
 			$preserve['orderby'] = $orderby;
+		}
+
+		// Attribute facets (Colour/Style/…) from the indexer, plus their selections.
+		$facets     = array();
+		$attr_index = JPWBC_Attr_Index::instance();
+		if ( $attr_index instanceof JPWBC_Attr_Index ) {
+			foreach ( $attr_index->selected_facets() as $fkey => $fslugs ) {
+				$preserve[ 'jpwbc_af_' . $fkey ] = $fslugs;
+			}
+			$show_attrs = ! isset( $args['show_attributes'] ) || ! empty( $args['show_attributes'] );
+			if ( $show_attrs ) {
+				$allow  = array();
+				$raw    = isset( $args['attributes'] ) ? (string) $args['attributes'] : '';
+				if ( '' !== $raw ) {
+					$allow = array_values( array_filter( array_map( 'trim', explode( ',', $raw ) ), 'strlen' ) );
+				}
+				$facets = $attr_index->get_brand_facets( (int) $brand->term_id, $allow );
+			}
 		}
 
 		$categories = array();
@@ -401,6 +423,7 @@ class JPWBC_Filter {
 				'url'     => $brand_url,
 			),
 			'categories'    => $categories,
+			'facets'        => $facets,
 			'active_cat'    => $active_cat,
 			'base_url'      => $base_url,
 			'preserve'      => $preserve,
