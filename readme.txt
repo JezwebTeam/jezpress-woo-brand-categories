@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.16.0
+Stable tag: 1.16.1
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.16.1 =
+* Fix: the price filter could show extra (empty) pagination pages on brands with variable products. Price filtering now uses WooCommerce's product lookup table (one row per product) instead of a `_price` meta query (which joined one row per variation and inflated the page count).
 
 = 1.16.0 =
 * New: only one filter dropdown is open at a time (accordion) — opening one closes the others.
@@ -166,6 +169,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.16.1 =
+Fixes extra/empty pagination pages when filtering by price on brands with variable products.
 
 = 1.16.0 =
 Filter UX: one dropdown open at a time, redundant Apply/Go buttons hidden in AJAX mode, more robust AJAX grid detection, and an index progress bar. Hard-refresh once so the new script loads.

@@ -107,7 +107,7 @@ class JPWBC_Filter {
 	 */
 	public function register_hooks(): void {
 		add_shortcode( 'jpwbc_brand_filter', array( $this, 'shortcode' ) );
-		add_action( 'pre_get_posts', array( $this, 'apply_price_filter' ) );
+		add_filter( 'posts_clauses', array( $this, 'price_clauses' ), 10, 2 );
 		add_filter( 'wp_robots', array( $this, 'filter_wp_robots' ) );
 		add_filter( 'rank_math/frontend/robots', array( $this, 'filter_rank_math_robots' ) );
 	}
@@ -196,63 +196,66 @@ class JPWBC_Filter {
 	 * ------------------------------------------------------------------- */
 
 	/**
-	 * Add the _price meta clause to the brand archive main query.
+	 * Constrain the brand archive main query to the price range.
 	 *
-	 * @since 1.13.0
+	 * Filters on WooCommerce's wc_product_meta_lookup table (one row per product,
+	 * with min_price/max_price columns) via posts_clauses — the same mechanism as
+	 * WooCommerce's own price filter. A _price postmeta meta_query would join one
+	 * row per variation on variable products, inflating found_posts (and thus the
+	 * pagination page count) even though the displayed products are de-duplicated.
 	 *
-	 * @param \WP_Query $q The query being prepared.
+	 * @since 1.16.1
+	 *
+	 * @param array<string, string> $clauses SQL clauses.
+	 * @param \WP_Query              $q       The query.
+	 * @return array<string, string>
 	 */
-	public function apply_price_filter( \WP_Query $q ): void {
-		if ( is_admin() || ! $q->is_main_query() || ! jpwbc_woocommerce_ready() ) {
-			return;
+	public function price_clauses( $clauses, $q ) {
+		if ( ! is_array( $clauses ) || ! $q instanceof \WP_Query ) {
+			return $clauses;
 		}
-
+		if ( is_admin() || ! $q->is_main_query() || ! jpwbc_woocommerce_ready() ) {
+			return $clauses;
+		}
 		// Only on a product_brand archive query (mirrors JPWBC_Rewrites' detection).
 		if ( '' === (string) $q->get( JPWBC_BRAND_TAXONOMY ) ) {
-			return;
+			return $clauses;
 		}
 
 		$min = $this->current_min();
 		$max = $this->current_max();
 		if ( null === $min && null === $max ) {
-			return;
+			return $clauses;
 		}
-
 		if ( null !== $min && null !== $max && $min > $max ) {
 			$swap = $min;
 			$min  = $max;
 			$max  = $swap;
 		}
 
-		$clause = array(
-			'key'  => '_price',
-			'type' => 'NUMERIC',
-		);
-		if ( null !== $min && null !== $max ) {
-			$clause['value']   = array( $min, $max );
-			$clause['compare'] = 'BETWEEN';
-		} elseif ( null !== $min ) {
-			$clause['value']   = $min;
-			$clause['compare'] = '>=';
-		} else {
-			$clause['value']   = $max;
-			$clause['compare'] = '<=';
+		global $wpdb;
+		$lookup = $wpdb->prefix . 'wc_product_meta_lookup';
+
+		// Guard: the lookup table is WooCommerce core (3.6+), but bail safely if absent.
+		if ( ! isset( $clauses['join'], $clauses['where'] ) ) {
+			return $clauses;
 		}
 
-		// AND the price clause with any existing meta_query, wrapping the existing
-		// one as a nested group so a pre-existing 'relation' => 'OR' can't turn the
-		// price constraint into an optional term.
-		$existing = $q->get( 'meta_query' );
-		if ( is_array( $existing ) && ! empty( $existing ) ) {
-			$meta_query = array(
-				'relation' => 'AND',
-				$existing,
-				$clause,
-			);
-		} else {
-			$meta_query = array( $clause );
+		if ( false === strpos( (string) $clauses['join'], 'jpwbc_pl' ) ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table/column identifiers are $wpdb-derived, not user input.
+			$clauses['join'] .= " INNER JOIN {$lookup} jpwbc_pl ON {$wpdb->posts}.ID = jpwbc_pl.product_id ";
 		}
-		$q->set( 'meta_query', $meta_query );
+
+		// Overlap semantics (as WooCommerce): the product's price range intersects
+		// the requested range. One lookup row per product → no row multiplication.
+		if ( null !== $min ) {
+			$clauses['where'] .= $wpdb->prepare( ' AND jpwbc_pl.max_price >= %f ', $min );
+		}
+		if ( null !== $max ) {
+			$clauses['where'] .= $wpdb->prepare( ' AND jpwbc_pl.min_price <= %f ', $max );
+		}
+
+		return $clauses;
 	}
 
 	/**
