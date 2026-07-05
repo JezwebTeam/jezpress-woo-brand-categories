@@ -19,6 +19,8 @@
  *     @type bool   $show_letter_counts Show a "(N)" count per letter.
  *     @type bool   $show_search        Show the brand search box.
  *     @type bool   $show_arrow         Show arrow after the heading.
+ *     @type bool   $sticky_index       Pin the heading + A-Z bar to the top while the list scrolls.
+ *     @type int    $sticky_offset      Sticky top offset in px (to clear a sticky site header).
  *     @type string $index_url          Optional Brands-page URL; makes each A-Z letter link to "{url}#jpwbc-az-{letter}".
  *     @type string $view_all_url       Optional "View all" URL.
  *     @type string $view_all_text      "View all" label.
@@ -49,10 +51,24 @@ $jpwbc_list_cols = ( $jpwbc_list_cols >= 1 && $jpwbc_list_cols <= 4 ) ? $jpwbc_l
 $jpwbc_counts    = ! empty( $data['show_letter_counts'] );
 $jpwbc_search    = ! empty( $data['show_search'] );
 $jpwbc_ix_layout = ( isset( $data['index_layout'] ) && 'inline' === $data['index_layout'] ) ? 'inline' : 'grid';
+$jpwbc_sticky    = ! empty( $data['sticky_index'] );
+$jpwbc_sticky_off = isset( $data['sticky_offset'] ) ? max( 0, (int) $data['sticky_offset'] ) : 0;
 
 if ( empty( $jpwbc_groups ) ) {
 	return;
 }
+
+// Root wrapper: optional Myer-style sticky heading + alphabet bar. The sticky
+// offset (to clear a sticky site header) is passed as a CSS custom property.
+$jpwbc_root_class = 'jpwbc-brand-cats jpwbc-allbrands';
+$jpwbc_root_attr  = '';
+if ( $jpwbc_sticky ) {
+	$jpwbc_root_class .= ' jpwbc-allbrands--sticky';
+	$jpwbc_root_attr   = ' style="--jpwbc-sticky-top:' . esc_attr( (string) $jpwbc_sticky_off ) . 'px"';
+}
+
+// The head (heading + search + index) is wrapped so it can be pinned as one block.
+$jpwbc_head_class = 'jpwbc-allbrands__head' . ( $jpwbc_sticky ? ' jpwbc-allbrands__head--sticky' : '' );
 
 // Index wrapper class: a fixed N-column grid, or an inline (Myer-style) row.
 $jpwbc_index_class = 'jpwbc-az-index';
@@ -83,7 +99,8 @@ $jpwbc_anchor = static function ( string $letter ): string {
 $jpwbc_present  = array_keys( $jpwbc_groups );
 $jpwbc_alphabet = array_merge( range( 'A', 'Z' ), array( '#' ) );
 ?>
-<div class="jpwbc-brand-cats jpwbc-allbrands">
+<div class="<?php echo esc_attr( $jpwbc_root_class ); ?>"<?php echo $jpwbc_root_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- value built from esc_attr()'d integer above. ?>>
+	<div class="<?php echo esc_attr( $jpwbc_head_class ); ?>">
 	<?php if ( '' !== $jpwbc_title ) : ?>
 		<h3 class="jpwbc-allbrands__title">
 			<?php echo esc_html( $jpwbc_title ); ?>
@@ -120,6 +137,7 @@ $jpwbc_alphabet = array_merge( range( 'A', 'Z' ), array( '#' ) );
 			<?php endforeach; ?>
 		</nav>
 	<?php endif; ?>
+	</div><?php // .jpwbc-allbrands__head ?>
 
 	<?php if ( $jpwbc_groups_on ) : ?>
 		<div class="jpwbc-az-groups">

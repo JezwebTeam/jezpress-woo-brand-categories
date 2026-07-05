@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.9.0 =
+* New (All Brands A-Z): "Sticky heading + alphabet bar" option — pins the heading and A-Z letter bar to the top of the viewport while the brand list scrolls underneath (like the Myer brands page). Includes a "Sticky top offset" control to clear a sticky site header.
+
 = 1.8.0 =
 * New (All Brands A-Z): Style controls for the "View all" link — link colour, hover colour and typography (font family, size, weight, etc.), matching the controls already available for the heading, letters and brand list.
 
@@ -137,6 +140,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.9.0 =
+Adds a "Sticky heading + alphabet bar" option (with top-offset control) to the All Brands (A-Z) widget, Myer-style.
 
 = 1.8.0 =
 Adds "View all" link Style controls (colour, hover colour, typography) to the All Brands (A-Z) widget.

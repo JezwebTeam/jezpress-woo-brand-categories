@@ -205,6 +205,31 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 		);
 
 		$this->add_control(
+			'sticky_index',
+			array(
+				'label'        => __( 'Sticky heading + alphabet bar', 'jezpress-woo-brand-categories' ),
+				'description'  => __( 'Pin the heading and A-Z bar to the top while the brand list scrolls (like the Myer brands page).', 'jezpress-woo-brand-categories' ),
+				'type'         => \Elementor\Controls_Manager::SWITCHER,
+				'default'      => '',
+				'return_value' => 'yes',
+			)
+		);
+
+		$this->add_control(
+			'sticky_offset',
+			array(
+				'label'       => __( 'Sticky top offset (px)', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'Distance from the top of the viewport — increase this to clear a sticky site header.', 'jezpress-woo-brand-categories' ),
+				'type'        => \Elementor\Controls_Manager::NUMBER,
+				'default'     => 0,
+				'min'         => 0,
+				'max'         => 400,
+				'step'        => 1,
+				'condition'   => array( 'sticky_index' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
 			'index_url',
 			array(
 				'label'       => __( 'Letters link to (Brands page URL)', 'jezpress-woo-brand-categories' ),
@@ -394,6 +419,8 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 				'show_search'        => isset( $settings['show_search'] ) && 'yes' === $settings['show_search'],
 				'show_arrow'         => isset( $settings['show_arrow'] ) && 'yes' === $settings['show_arrow'],
 				'index_url'          => $index_url,
+				'sticky_index'       => isset( $settings['sticky_index'] ) && 'yes' === $settings['sticky_index'],
+				'sticky_offset'      => isset( $settings['sticky_offset'] ) ? (int) $settings['sticky_offset'] : 0,
 				'view_all_url'       => $url,
 				'view_all_text'      => isset( $settings['view_all_text'] ) ? (string) $settings['view_all_text'] : '',
 			)

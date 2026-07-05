@@ -325,3 +325,20 @@
 	color: var(--jpwbc-pink);
 	font-weight: 600;
 }
+
+/* Sticky heading + alphabet bar (Myer-style). The head block (heading + search
+ * + A-Z index) pins to the top while the grouped brand list scrolls under it.
+ * --jpwbc-sticky-top lets the widget clear a sticky site header. */
+.jpwbc-allbrands--sticky .jpwbc-allbrands__head--sticky {
+	position: sticky;
+	top: var( --jpwbc-sticky-top, 0px );
+	z-index: 20;
+	background: #fff;
+	padding: 0.6em 0;
+	box-shadow: 0 1px 0 var(--jpwbc-border);
+}
+
+/* Offset in-page letter jumps so a target section clears the pinned bar. */
+.jpwbc-allbrands--sticky .jpwbc-az-group {
+	scroll-margin-top: calc( var( --jpwbc-sticky-top, 0px ) + 110px );
+}
