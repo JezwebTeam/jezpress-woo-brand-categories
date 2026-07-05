@@ -320,6 +320,30 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->add_responsive_control(
+			'letter_gap',
+			array(
+				'label'      => __( 'Gap below letter heading', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'Space between the letter heading (and its underline) and the brand list below it.', 'jezpress-woo-brand-categories' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 60,
+					),
+					'em' => array(
+						'min'  => 0,
+						'max'  => 5,
+						'step' => 0.1,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .jpwbc-az-group__letter' => 'margin-bottom: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
 		$this->add_group_control(
 			\Elementor\Group_Control_Typography::get_type(),
 			array(
