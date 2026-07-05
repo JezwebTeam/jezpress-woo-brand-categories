@@ -320,6 +320,8 @@ class JPWBC_Filter {
 				'show_sort'       => 'yes',
 				'show_attributes' => 'yes',
 				'attributes'      => '',
+				'ajax'            => 'yes',
+				'results'         => 'ul.products',
 			),
 			is_array( $atts ) ? $atts : array(),
 			'jpwbc_brand_filter'
@@ -337,6 +339,8 @@ class JPWBC_Filter {
 				'show_sort'       => $truthy( $atts['show_sort'] ),
 				'show_attributes' => $truthy( $atts['show_attributes'] ),
 				'attributes'      => is_string( $atts['attributes'] ) ? $atts['attributes'] : '',
+				'ajax'            => $truthy( $atts['ajax'] ),
+				'results_selector' => is_string( $atts['results'] ) ? $atts['results'] : 'ul.products',
 			)
 		);
 	}
@@ -432,10 +436,12 @@ class JPWBC_Filter {
 			'current_max'   => $max,
 			'current_sort'  => $orderby,
 			'sort_options'  => $this->sort_options(),
-			'show_category' => ! isset( $args['show_category'] ) || ! empty( $args['show_category'] ),
-			'show_price'    => ! isset( $args['show_price'] ) || ! empty( $args['show_price'] ),
-			'show_sort'     => ! isset( $args['show_sort'] ) || ! empty( $args['show_sort'] ),
-			'is_filtered'   => $this->is_filtered(),
+			'show_category'    => ! isset( $args['show_category'] ) || ! empty( $args['show_category'] ),
+			'show_price'       => ! isset( $args['show_price'] ) || ! empty( $args['show_price'] ),
+			'show_sort'        => ! isset( $args['show_sort'] ) || ! empty( $args['show_sort'] ),
+			'ajax'             => ! isset( $args['ajax'] ) || ! empty( $args['ajax'] ),
+			'results_selector' => isset( $args['results_selector'] ) && '' !== (string) $args['results_selector'] ? (string) $args['results_selector'] : 'ul.products',
+			'is_filtered'      => $this->is_filtered(),
 		);
 
 		return jpwbc_get_template( 'brand-filter-bar.php', $data );

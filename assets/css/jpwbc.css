@@ -521,6 +521,36 @@
 	font-size: 0.95em;
 }
 
+/* AJAX loading state on the product grid being refreshed. */
+.jpwbc-loading-grid {
+	position: relative;
+	opacity: 0.55;
+	transition: opacity 0.15s ease;
+	pointer-events: none;
+}
+
+.jpwbc-loading-grid::after {
+	content: "";
+	position: absolute;
+	top: 40px;
+	left: 50%;
+	width: 28px;
+	height: 28px;
+	margin-left: -14px;
+	border: 3px solid var(--jpwbc-border);
+	border-top-color: var(--jpwbc-pink);
+	border-radius: 50%;
+	animation: jpwbc-spin 0.7s linear infinite;
+}
+
+.jpwbc-no-motion .jpwbc-loading-grid::after {
+	animation: none;
+}
+
+@keyframes jpwbc-spin {
+	to { transform: rotate( 360deg ); }
+}
+
 /* -------------------------------------------------------------------------
  * Brand Category Filter (chips) — Myer-style horizontal pill row
  * ------------------------------------------------------------------------- */

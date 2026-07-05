@@ -170,11 +170,15 @@
 	}
 
 	// Filter bar: auto-submit a form on <select> change (and hide its manual
-	// submit button, which is only there for the no-JS fallback).
+	// submit button, which is only there for the no-JS fallback). Skipped for
+	// bars handled by the AJAX enhancement (that binds its own change handler).
 	function bindAutoSubmit( root ) {
 		var forms = root.querySelectorAll( 'form.jpwbc-autosubmit' );
 		Array.prototype.forEach.call( forms, function ( form ) {
 			form.classList.add( 'jpwbc-js' );
+			if ( form.closest( '.jpwbc-filterbar[data-jpwbc-ajax="1"]' ) ) {
+				return;
+			}
 			var select = form.querySelector( 'select' );
 			if ( ! select ) {
 				return;
@@ -182,6 +186,157 @@
 			select.addEventListener( 'change', function () {
 				form.submit();
 			} );
+		} );
+	}
+
+	// Filter bar AJAX: fetch the target (filtered) URL, swap the product grid +
+	// the filter bar, and pushState — a progressive enhancement over the plain
+	// query-param links/forms, which keep working without JS. If the results
+	// container can't be found, we do nothing and let normal navigation happen.
+	function bindFilterAjax( bar ) {
+		if ( ! bar || bar.getAttribute( 'data-jpwbc-ajax' ) !== '1' ) {
+			return;
+		}
+		if ( ! window.fetch || ! window.history || ! window.DOMParser ) {
+			return; // fall back to full-page navigation.
+		}
+		var resultsSel = bar.getAttribute( 'data-jpwbc-results' ) || 'ul.products';
+		var extraSel   = [ '.woocommerce-pagination', '.woocommerce-result-count' ];
+
+		function currentResults() {
+			return document.querySelector( resultsSel );
+		}
+		if ( ! currentResults() ) {
+			return; // grid not on this page / wrong selector — leave default behaviour.
+		}
+
+		function openKeys( scope ) {
+			var keys = [];
+			Array.prototype.forEach.call( scope.querySelectorAll( 'details[data-jpwbc-facet][open]' ), function ( d ) {
+				keys.push( d.getAttribute( 'data-jpwbc-facet' ) );
+			} );
+			return keys;
+		}
+
+		function swap( sel, doc ) {
+			var next = doc.querySelector( sel );
+			var curr = document.querySelector( sel );
+			if ( next && curr && curr.parentNode ) {
+				curr.parentNode.replaceChild( next, curr );
+				return next;
+			}
+			return null;
+		}
+
+		function navigate( url, push ) {
+			var results = currentResults();
+			if ( results ) {
+				results.classList.add( 'jpwbc-loading-grid' );
+			}
+			fetch( url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } } )
+				.then( function ( r ) { return r.text(); } )
+				.then( function ( html ) {
+					var doc = new window.DOMParser().parseFromString( html, 'text/html' );
+
+					swap( resultsSel, doc );
+					extraSel.forEach( function ( s ) { swap( s, doc ); } );
+
+					// Replace the filter bar, preserving which dropdowns were open.
+					var wasOpen = openKeys( bar );
+					var nextBar = doc.querySelector( '.jpwbc-filterbar' );
+					var liveBar = bar;
+					if ( nextBar && bar.parentNode ) {
+						bar.parentNode.replaceChild( nextBar, bar );
+						liveBar = nextBar;
+						wasOpen.forEach( function ( key ) {
+							var d = nextBar.querySelector( 'details[data-jpwbc-facet="' + ( window.CSS && CSS.escape ? CSS.escape( key ) : key ) + '"]' );
+							if ( d ) {
+								d.open = true;
+							}
+						} );
+						bindFilterAjax( liveBar );
+					}
+
+					if ( push ) {
+						window.history.pushState( { jpwbcAjax: 1 }, '', url );
+					}
+
+					var top = document.querySelector( resultsSel );
+					if ( top && top.scrollIntoView ) {
+						top.scrollIntoView( { behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' } );
+					}
+				} )
+				.catch( function () {
+					window.location.href = url; // network error → hard navigate.
+				} )
+				.finally( function () {
+					var r2 = currentResults();
+					if ( r2 ) {
+						r2.classList.remove( 'jpwbc-loading-grid' );
+					}
+				} );
+		}
+
+		function urlFromForm( form ) {
+			var action = form.getAttribute( 'action' ) || window.location.pathname;
+			var params = new URLSearchParams( new FormData( form ) );
+			var qs     = params.toString();
+			return qs ? action + '?' + qs : action;
+		}
+
+		// Links (category / facet options / clear).
+		bar.addEventListener( 'click', function ( e ) {
+			var link = e.target.closest ? e.target.closest( 'a.jpwbc-filter__opt, a.jpwbc-filter__clear' ) : null;
+			if ( ! link || ! link.href ) {
+				return;
+			}
+			e.preventDefault();
+			navigate( link.href, true );
+		} );
+
+		// Forms (price / sort / facet). Intercept submit; auto-submit on change.
+		bar.addEventListener( 'submit', function ( e ) {
+			var form = e.target.closest ? e.target.closest( 'form' ) : null;
+			if ( ! form ) {
+				return;
+			}
+			e.preventDefault();
+			navigate( urlFromForm( form ), true );
+		} );
+		bar.addEventListener( 'change', function ( e ) {
+			var form = e.target.closest ? e.target.closest( 'form' ) : null;
+			if ( ! form ) {
+				return;
+			}
+			if ( form.requestSubmit ) {
+				form.requestSubmit();
+			} else {
+				navigate( urlFromForm( form ), true );
+			}
+		} );
+
+		// Pagination links inside the swapped grid.
+		document.addEventListener( 'click', function ( e ) {
+			var pl = e.target.closest ? e.target.closest( '.woocommerce-pagination a, a.page-numbers' ) : null;
+			if ( ! pl || ! pl.href || ! currentResults() ) {
+				return;
+			}
+			e.preventDefault();
+			navigate( pl.href, true );
+		} );
+
+		if ( ! window.jpwbcPopstateBound ) {
+			window.jpwbcPopstateBound = true;
+			window.addEventListener( 'popstate', function () {
+				var b = document.querySelector( '.jpwbc-filterbar[data-jpwbc-ajax="1"]' );
+				if ( b ) {
+					// Re-fetch the now-current URL without pushing another state.
+					b.dispatchEvent( new CustomEvent( 'jpwbc:popnav' ) );
+				}
+			} );
+		}
+		bar.addEventListener( 'jpwbc:popnav', function () {
+			navigate( window.location.href, false );
 		} );
 	}
 
@@ -195,6 +350,9 @@
 			bindSearch( root );
 			bindBrandFilter( root );
 			bindAutoSubmit( root );
+			if ( root.classList.contains( 'jpwbc-filterbar' ) ) {
+				bindFilterAjax( root );
+			}
 		} );
 
 		document.addEventListener( 'click', trackClick, true );

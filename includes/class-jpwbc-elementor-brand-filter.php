@@ -155,6 +155,28 @@ class JPWBC_Elementor_Brand_Filter extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'ajax',
+			array(
+				'label'        => __( 'AJAX filtering (no page reload)', 'jezpress-woo-brand-categories' ),
+				'description'  => __( 'Update the product grid in place, like a modern shop filter. Falls back to normal page loads if unsupported.', 'jezpress-woo-brand-categories' ),
+				'type'         => \Elementor\Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'return_value' => 'yes',
+			)
+		);
+
+		$this->add_control(
+			'results_selector',
+			array(
+				'label'       => __( 'Product grid CSS selector', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'The element wrapping the product grid to refresh via AJAX. Default "ul.products" suits most WooCommerce archives; change it if your template uses a custom container.', 'jezpress-woo-brand-categories' ),
+				'type'        => \Elementor\Controls_Manager::TEXT,
+				'default'     => 'ul.products',
+				'condition'   => array( 'ajax' => 'yes' ),
+			)
+		);
+
 		$this->add_responsive_control(
 			'align',
 			array(
@@ -290,6 +312,8 @@ class JPWBC_Elementor_Brand_Filter extends \Elementor\Widget_Base {
 				'show_sort'       => isset( $settings['show_sort'] ) && 'yes' === $settings['show_sort'],
 				'show_attributes' => isset( $settings['show_attributes'] ) && 'yes' === $settings['show_attributes'],
 				'attributes'      => isset( $settings['attributes'] ) ? (string) $settings['attributes'] : '',
+				'ajax'            => ! isset( $settings['ajax'] ) || 'yes' === $settings['ajax'],
+				'results_selector' => isset( $settings['results_selector'] ) ? (string) $settings['results_selector'] : 'ul.products',
 			)
 		);
 	}

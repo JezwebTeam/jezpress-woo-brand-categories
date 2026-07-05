@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.14.0
+Stable tag: 1.15.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.15.0 =
+* New: AJAX filtering for the Brand Filter Bar. Selecting a category, price, sort or attribute facet now refreshes the product grid in place (no full page reload), with the URL kept in sync (shareable + back-button friendly) and the filter bar counts/active states updated live. It's a progressive enhancement — with JavaScript off (or if the grid can't be located) it falls back to the existing query-param page loads. New "AJAX filtering" toggle + "Product grid CSS selector" (default `ul.products`) on the widget; `[jpwbc_brand_filter]` gains ajax and results atts.
 
 = 1.14.0 =
 * New: dynamic attribute facets (Colour, Style, …) in the Brand Filter Bar. The plugin indexes the store's *custom* (non-taxonomy) variation attributes — including those written by an API sync — into filterable, per-brand facets with product counts, without changing the source data. Each brand shows only the attributes its own products use. Multi-select, query-param based, and noindexed like the other filters.
@@ -157,6 +160,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.15.0 =
+Adds AJAX (no-reload) filtering to the Brand Filter Bar. If your archive template uses a custom product container, set the "Product grid CSS selector" on the widget.
 
 = 1.14.0 =
 Adds dynamic Colour/Style attribute facets to the Brand Filter Bar (built from custom variation attributes via a self-healing index). After updating, rebuild the index under Brand Categories > Cache.

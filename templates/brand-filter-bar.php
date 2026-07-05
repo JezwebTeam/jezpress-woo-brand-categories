@@ -48,6 +48,8 @@ $jpwbc_max      = isset( $data['current_max'] ) && null !== $data['current_max']
 $jpwbc_sort     = isset( $data['current_sort'] ) ? (string) $data['current_sort'] : '';
 $jpwbc_sorts    = isset( $data['sort_options'] ) && is_array( $data['sort_options'] ) ? $data['sort_options'] : array();
 $jpwbc_facets   = isset( $data['facets'] ) && is_array( $data['facets'] ) ? $data['facets'] : array();
+$jpwbc_ajax     = ! empty( $data['ajax'] );
+$jpwbc_res_sel  = isset( $data['results_selector'] ) && '' !== (string) $data['results_selector'] ? (string) $data['results_selector'] : 'ul.products';
 $jpwbc_show_cat = ! isset( $data['show_category'] ) || ! empty( $data['show_category'] );
 $jpwbc_show_pr  = ! isset( $data['show_price'] ) || ! empty( $data['show_price'] );
 $jpwbc_show_srt = ! isset( $data['show_sort'] ) || ! empty( $data['show_sort'] );
@@ -105,10 +107,10 @@ if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt && empty( $jpwbc
 	return;
 }
 ?>
-<div class="jpwbc-brand-cats jpwbc-filterbar">
+<div class="jpwbc-brand-cats jpwbc-filterbar" data-jpwbc-ajax="<?php echo $jpwbc_ajax ? '1' : '0'; ?>" data-jpwbc-results="<?php echo esc_attr( $jpwbc_res_sel ); ?>">
 
 	<?php if ( $jpwbc_show_cat && ! empty( $jpwbc_cats ) ) : ?>
-		<details class="jpwbc-filter jpwbc-filter--category">
+		<details class="jpwbc-filter jpwbc-filter--category" data-jpwbc-facet="category">
 			<summary class="jpwbc-filter__toggle">
 				<span class="jpwbc-filter__label"><?php esc_html_e( 'Category', 'jezpress-woo-brand-categories' ); ?></span>
 				<span class="jpwbc-filter__value"><?php echo esc_html( $jpwbc_cat_label ); ?></span>
@@ -160,7 +162,7 @@ if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt && empty( $jpwbc
 			}
 		}
 		?>
-		<details class="jpwbc-filter jpwbc-filter--attr">
+		<details class="jpwbc-filter jpwbc-filter--attr" data-jpwbc-facet="<?php echo esc_attr( 'attr-' . $jpwbc_f_key ); ?>">
 			<summary class="jpwbc-filter__toggle">
 				<span class="jpwbc-filter__label"><?php echo esc_html( $jpwbc_f_label ); ?></span>
 				<?php if ( $jpwbc_f_selcount > 0 ) : ?>
@@ -196,7 +198,7 @@ if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt && empty( $jpwbc
 	<?php endforeach; ?>
 
 	<?php if ( $jpwbc_show_pr ) : ?>
-		<details class="jpwbc-filter jpwbc-filter--price">
+		<details class="jpwbc-filter jpwbc-filter--price" data-jpwbc-facet="price">
 			<summary class="jpwbc-filter__toggle">
 				<span class="jpwbc-filter__label"><?php esc_html_e( 'Price', 'jezpress-woo-brand-categories' ); ?></span>
 				<?php if ( null !== $jpwbc_min || null !== $jpwbc_max ) : ?>
