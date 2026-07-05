@@ -98,6 +98,7 @@ class JPWBC_Frontend {
 	 */
 	public function register_hooks(): void {
 		add_shortcode( 'jpwbc_brand_categories', array( $this, 'shortcode' ) );
+		add_shortcode( 'jpwbc_brand_chips', array( $this, 'shortcode_chips' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 		if ( 'auto_hook' === ( $this->settings['placement'] ?? 'shortcode' ) ) {
@@ -148,6 +149,85 @@ class JPWBC_Frontend {
 		);
 
 		return $this->render( is_string( $atts['brand'] ) ? $atts['brand'] : '' );
+	}
+
+	/**
+	 * [jpwbc_brand_chips] shortcode callback.
+	 *
+	 * @since 1.12.0
+	 *
+	 * @param array<string, mixed>|string $atts Shortcode attributes.
+	 * @return string
+	 */
+	public function shortcode_chips( $atts ): string {
+		$atts = shortcode_atts(
+			array(
+				'brand'       => '',
+				'all_text'    => __( 'All {brand}', 'jezpress-woo-brand-categories' ),
+				'show_all'    => 'yes',
+				'show_counts' => 'no',
+			),
+			is_array( $atts ) ? $atts : array(),
+			'jpwbc_brand_chips'
+		);
+
+		$truthy = static function ( $v ): bool {
+			return 'yes' === $v || '1' === (string) $v || 'true' === $v;
+		};
+
+		return $this->render_chips(
+			is_string( $atts['brand'] ) ? $atts['brand'] : '',
+			array(
+				'all_text'    => (string) $atts['all_text'],
+				'show_all'    => $truthy( $atts['show_all'] ),
+				'show_counts' => $truthy( $atts['show_counts'] ),
+			)
+		);
+	}
+
+	/**
+	 * Render the current brand's categories as a horizontal chip/pill filter row.
+	 *
+	 * Reuses the same brand resolution, category query and clean combo URLs as
+	 * the dropdown; only the presentation differs. Not subject to the dropdown's
+	 * single-render guard, so it can sit alongside the dropdown/auto-hook.
+	 *
+	 * @since 1.12.0
+	 *
+	 * @param string               $brand_override Optional brand slug to force.
+	 * @param array<string, mixed> $opts           all_text, show_all, show_counts.
+	 * @return string
+	 */
+	public function render_chips( string $brand_override = '', array $opts = array() ): string {
+		if ( empty( $this->settings['enabled'] ) || ! jpwbc_woocommerce_ready() ) {
+			return '';
+		}
+
+		$current_brand = $this->resolve_current_brand( $brand_override );
+		if ( ! $current_brand instanceof \WP_Term ) {
+			return '';
+		}
+
+		jpwbc_enqueue_frontend_assets();
+
+		$active_cat = sanitize_title( (string) get_query_var( JPWBC_QUERY_VAR ) );
+
+		$data = array(
+			'settings'        => $this->settings,
+			'current_brand'   => array(
+				'term_id' => (int) $current_brand->term_id,
+				'name'    => $current_brand->name,
+				'slug'    => $current_brand->slug,
+				'url'     => $this->rewrites->brand_url( $current_brand->slug ),
+			),
+			'categories'      => $this->category_rows( $current_brand, $active_cat ),
+			'active_cat_slug' => $active_cat,
+			'all_text'        => isset( $opts['all_text'] ) ? (string) $opts['all_text'] : __( 'All {brand}', 'jezpress-woo-brand-categories' ),
+			'show_all'        => ! isset( $opts['show_all'] ) || ! empty( $opts['show_all'] ),
+			'show_counts'     => ! empty( $opts['show_counts'] ),
+		);
+
+		return jpwbc_get_template( 'brand-category-chips.php', $data );
 	}
 
 	/**

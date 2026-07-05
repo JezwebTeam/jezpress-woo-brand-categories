@@ -326,6 +326,50 @@
 	font-weight: 600;
 }
 
+/* -------------------------------------------------------------------------
+ * Brand Category Filter (chips) — Myer-style horizontal pill row
+ * ------------------------------------------------------------------------- */
+.jpwbc-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5em;
+	align-items: center;
+	margin: 0 0 1em;
+	padding: 0;
+}
+
+.jpwbc-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.45em 0.95em;
+	border: 1px solid var(--jpwbc-border);
+	border-radius: 999px;
+	background: var(--jpwbc-grey);
+	color: inherit;
+	text-decoration: none;
+	line-height: 1.2;
+	transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.jpwbc-chip:hover,
+.jpwbc-chip:focus {
+	color: var(--jpwbc-pink);
+	border-color: var(--jpwbc-pink-light);
+}
+
+.jpwbc-chip.is-active {
+	color: #fff;
+	background: var(--jpwbc-pink);
+	border-color: var(--jpwbc-pink);
+	font-weight: 600;
+}
+
+.jpwbc-chip__count {
+	font-size: 0.85em;
+	opacity: 0.75;
+}
+
 /* Sticky heading + alphabet bar (Myer-style). The head block (heading + search
  * + A-Z index) pins to the top while the grouped brand list scrolls under it.
  * --jpwbc-sticky-top lets the widget clear a sticky site header. */

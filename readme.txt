@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.11.0
+Stable tag: 1.12.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 
 == Changelog ==
 
+= 1.12.0 =
+* New: "Brand Category Filter (chips)" Elementor widget + `[jpwbc_brand_chips]` shortcode — shows the current brand's product categories as a horizontal row of pills (Myer-style), each linking to the clean `/{brand}/{category}/` combo URL, with the active category highlighted and an optional "All {brand}" chip and per-chip product counts. Full Style controls (typography, gap, padding, radius, border, and Normal/Hover/Active colours).
+
 = 1.11.0 =
 * New (All Brands A-Z): "Brand list area padding" Style control (responsive top/right/bottom/left) — add padding around the grouped brand list below the alphabet bar.
 
@@ -146,6 +149,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.12.0 =
+Adds a "Brand Category Filter (chips)" widget/shortcode — the current brand's categories as a Myer-style horizontal pill filter.
 
 = 1.11.0 =
 Adds a "Brand list area padding" Style control to the All Brands (A-Z) widget.
