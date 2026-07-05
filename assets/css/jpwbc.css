@@ -327,6 +327,179 @@
 }
 
 /* -------------------------------------------------------------------------
+ * Brand Filter Bar (Category + Price + Sort) — Myer/Radley-style control row
+ * ------------------------------------------------------------------------- */
+.jpwbc-filterbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.6em;
+	margin: 0 0 1.25em;
+}
+
+.jpwbc-filter {
+	position: relative;
+}
+
+/* Each control looks like an outlined pill button. */
+.jpwbc-filter__toggle,
+.jpwbc-filter--sort {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.5em 1em;
+	border: 1px solid var(--jpwbc-border);
+	border-radius: 999px;
+	background: #fff;
+	cursor: pointer;
+	line-height: 1.2;
+	list-style: none;
+}
+
+.jpwbc-filter__toggle::-webkit-details-marker {
+	display: none;
+}
+
+/* Dropdown caret. */
+.jpwbc-filter__toggle::after {
+	content: "";
+	width: 0;
+	height: 0;
+	margin-left: 0.15em;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	border-top: 5px solid currentColor;
+	transition: transform 0.15s ease;
+}
+
+.jpwbc-filter[open] .jpwbc-filter__toggle::after {
+	transform: rotate( 180deg );
+}
+
+.jpwbc-filter__label {
+	font-weight: 600;
+}
+
+.jpwbc-filter__value {
+	color: var(--jpwbc-pink);
+}
+
+/* Pop-over panel for category/price. */
+.jpwbc-filter__panel {
+	position: absolute;
+	z-index: 30;
+	top: calc( 100% + 0.4em );
+	left: 0;
+	min-width: 240px;
+	max-height: 60vh;
+	overflow: auto;
+	padding: 0.6em;
+	background: #fff;
+	border: 1px solid var(--jpwbc-border);
+	border-radius: 8px;
+	box-shadow: 0 6px 20px rgba( 0, 0, 0, 0.12 );
+}
+
+.jpwbc-filter__list {
+	list-style: none !important;
+	margin: 0;
+	padding: 0 !important;
+}
+
+.jpwbc-filter__list > li {
+	list-style: none !important;
+	margin: 0;
+}
+
+.jpwbc-filter__opt {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75em;
+	padding: 0.4em 0.5em;
+	color: inherit;
+	text-decoration: none;
+	border-radius: 4px;
+}
+
+.jpwbc-filter__opt:hover,
+.jpwbc-filter__opt:focus {
+	background: var(--jpwbc-grey);
+	color: var(--jpwbc-pink);
+}
+
+.jpwbc-filter__opt.is-active {
+	color: var(--jpwbc-pink);
+	font-weight: 600;
+}
+
+.jpwbc-filter__opt-count {
+	color: #6b6b70;
+	font-size: 0.85em;
+}
+
+/* Price form. */
+.jpwbc-price-fields {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	margin-bottom: 0.6em;
+}
+
+.jpwbc-price-field input {
+	width: 6.5em;
+	padding: 0.45em 0.6em;
+	border: 1px solid var(--jpwbc-border);
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+
+.jpwbc-filter__apply {
+	padding: 0.5em 1.1em;
+	border: 0;
+	border-radius: 999px;
+	background: var(--jpwbc-pink);
+	color: #fff;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.jpwbc-filter__apply:hover,
+.jpwbc-filter__apply:focus {
+	background: var(--jpwbc-pink-light);
+}
+
+/* Sort control (a form styled as a pill). */
+.jpwbc-filter--sort {
+	gap: 0.5em;
+}
+
+.jpwbc-sort {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+}
+
+.jpwbc-sort__select {
+	border: 0;
+	background: transparent;
+	font: inherit;
+	color: inherit;
+	cursor: pointer;
+}
+
+/* With JS, the sort form auto-submits — hide the manual button. */
+.jpwbc-filter--sort.jpwbc-js .jpwbc-filter__apply--sort {
+	display: none;
+}
+
+.jpwbc-filter__clear {
+	color: var(--jpwbc-pink);
+	text-decoration: underline;
+	font-size: 0.95em;
+}
+
+/* -------------------------------------------------------------------------
  * Brand Category Filter (chips) — Myer-style horizontal pill row
  * ------------------------------------------------------------------------- */
 .jpwbc-chips {

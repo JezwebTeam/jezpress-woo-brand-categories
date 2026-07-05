@@ -3,7 +3,7 @@
  * Plugin Name: JezPress Woo Brand Categories
  * Plugin URI: https://jezpress.com/plugins/jezpress-woo-brand-categories
  * Description: In-brand product-category navigation and clean brand+category URLs for WooCommerce brand archives.
- * Version: 1.12.0
+ * Version: 1.13.0
  * Author: Jezweb
  * Author URI: https://jezpress.com
  * License: GPL-2.0+
@@ -76,7 +76,7 @@ if ( version_compare( PHP_VERSION, '8.1.0', '<' ) ) {
  *
  * @since 1.0.0
  */
-define( 'JPWBC_VERSION', '1.12.0' );
+define( 'JPWBC_VERSION', '1.13.0' );
 define( 'JPWBC_PLUGIN_FILE', __FILE__ );
 define( 'JPWBC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JPWBC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -335,6 +335,7 @@ function jpwbc_include_files(): void {
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-frontend.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-seo-rankmath.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-brands.php';
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-filter.php';
 }
 
 /**
@@ -415,6 +416,10 @@ function jpwbc_init(): void {
 			$brands = new JPWBC_Brands();
 			$brands->register_hooks();
 
+			// Brand archive filter bar (Category + Price + Sort).
+			$filter = new JPWBC_Filter( $query, $rewrites, $settings );
+			$filter->register_hooks();
+
 			// Register the Elementor widgets when Elementor is active.
 			add_action( 'elementor/widgets/register', 'jpwbc_register_elementor_widget' );
 		}
@@ -446,6 +451,7 @@ function jpwbc_register_elementor_widget( $widgets_manager ): void {
 
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-widget.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-brand-chips.php';
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-brand-filter.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-trending.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-brands-az.php';
 
@@ -454,6 +460,9 @@ function jpwbc_register_elementor_widget( $widgets_manager ): void {
 	}
 	if ( class_exists( 'JPWBC_Elementor_Brand_Chips' ) ) {
 		$widgets_manager->register( new JPWBC_Elementor_Brand_Chips() );
+	}
+	if ( class_exists( 'JPWBC_Elementor_Brand_Filter' ) ) {
+		$widgets_manager->register( new JPWBC_Elementor_Brand_Filter() );
 	}
 	if ( class_exists( 'JPWBC_Elementor_Trending' ) ) {
 		$widgets_manager->register( new JPWBC_Elementor_Trending() );

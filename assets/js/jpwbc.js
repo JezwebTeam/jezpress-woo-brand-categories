@@ -169,6 +169,22 @@
 		} );
 	}
 
+	// Filter bar: auto-submit a form on <select> change (and hide its manual
+	// submit button, which is only there for the no-JS fallback).
+	function bindAutoSubmit( root ) {
+		var forms = root.querySelectorAll( 'form.jpwbc-autosubmit' );
+		Array.prototype.forEach.call( forms, function ( form ) {
+			form.classList.add( 'jpwbc-js' );
+			var select = form.querySelector( 'select' );
+			if ( ! select ) {
+				return;
+			}
+			select.addEventListener( 'change', function () {
+				form.submit();
+			} );
+		} );
+	}
+
 	ready( function () {
 		var roots = document.querySelectorAll( '.jpwbc-brand-cats' );
 		Array.prototype.forEach.call( roots, function ( root ) {
@@ -178,6 +194,7 @@
 			bindToggles( root );
 			bindSearch( root );
 			bindBrandFilter( root );
+			bindAutoSubmit( root );
 		} );
 
 		document.addEventListener( 'click', trackClick, true );

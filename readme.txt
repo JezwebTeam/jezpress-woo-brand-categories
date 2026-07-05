@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.12.0
+Stable tag: 1.13.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.13.0 =
+* New: "Brand Filter Bar" Elementor widget + `[jpwbc_brand_filter]` shortcode — a Myer/Radley-style filter + sort bar for brand archives. Category (via the clean combo URLs, indexable), Price (min/max, applied to the archive product query), and Sort by (Recommended / Price / Recently Added / Most Popular, using WooCommerce's native ordering). Query-param based (reload, no AJAX) so it's cache-friendly; price/sort-filtered views are set to noindex,follow. Works without JavaScript; the Sort control auto-submits when JS is on.
 
 = 1.12.0 =
 * New: "Brand Category Filter (chips)" Elementor widget + `[jpwbc_brand_chips]` shortcode — shows the current brand's product categories as a horizontal row of pills (Myer-style), each linking to the clean `/{brand}/{category}/` combo URL, with the active category highlighted and an optional "All {brand}" chip and per-chip product counts. Full Style controls (typography, gap, padding, radius, border, and Normal/Hover/Active colours).
@@ -149,6 +152,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.13.0 =
+Adds a "Brand Filter Bar" widget/shortcode (Category + Price + Sort) for brand archives, query-param based with noindex on filtered views.
 
 = 1.12.0 =
 Adds a "Brand Category Filter (chips)" widget/shortcode — the current brand's categories as a Myer-style horizontal pill filter.
