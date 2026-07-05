@@ -189,6 +189,24 @@
 		} );
 	}
 
+	// Filter bar: only one dropdown open at a time (accordion). Works with or
+	// without AJAX. Re-applied to the fresh bar after each AJAX swap.
+	function bindAccordion( bar ) {
+		var items = bar.querySelectorAll( 'details[data-jpwbc-facet]' );
+		Array.prototype.forEach.call( items, function ( d ) {
+			d.addEventListener( 'toggle', function () {
+				if ( ! d.open ) {
+					return;
+				}
+				Array.prototype.forEach.call( items, function ( other ) {
+					if ( other !== d ) {
+						other.open = false;
+					}
+				} );
+			} );
+		} );
+	}
+
 	// Filter bar AJAX: fetch the target (filtered) URL, swap the product grid +
 	// the filter bar, and pushState — a progressive enhancement over the plain
 	// query-param links/forms, which keep working without JS. If the results
@@ -200,15 +218,34 @@
 		if ( ! window.fetch || ! window.history || ! window.DOMParser ) {
 			return; // fall back to full-page navigation.
 		}
-		var resultsSel = bar.getAttribute( 'data-jpwbc-results' ) || 'ul.products';
-		var extraSel   = [ '.woocommerce-pagination', '.woocommerce-result-count' ];
+		var extraSel = [ '.woocommerce-pagination', '.woocommerce-result-count' ];
+
+		// Resolve the product-grid container: the configured selector first, then
+		// common WooCommerce / Elementor fallbacks, so AJAX engages out of the box.
+		var candidates = [
+			bar.getAttribute( 'data-jpwbc-results' ),
+			'ul.products',
+			'.elementor-widget-woocommerce-products ul.products',
+			'.woocommerce ul.products',
+			'.products'
+		].filter( Boolean );
+		var resultsSel = null;
+		for ( var ci = 0; ci < candidates.length; ci++ ) {
+			if ( document.querySelector( candidates[ ci ] ) ) {
+				resultsSel = candidates[ ci ];
+				break;
+			}
+		}
+		if ( ! resultsSel ) {
+			return; // grid not found — leave default (full-page) navigation.
+		}
 
 		function currentResults() {
 			return document.querySelector( resultsSel );
 		}
-		if ( ! currentResults() ) {
-			return; // grid not on this page / wrong selector — leave default behaviour.
-		}
+
+		// Mark the bar so CSS can hide the no-JS-only Apply/Go buttons.
+		bar.classList.add( 'jpwbc-ajax-active' );
 
 		function openKeys( scope ) {
 			var keys = [];
@@ -255,6 +292,7 @@
 							}
 						} );
 						bindFilterAjax( liveBar );
+						bindAccordion( liveBar );
 					}
 
 					if ( push ) {
@@ -304,7 +342,13 @@
 			navigate( urlFromForm( form ), true );
 		} );
 		bar.addEventListener( 'change', function ( e ) {
-			var form = e.target.closest ? e.target.closest( 'form' ) : null;
+			var t = e.target;
+			// Auto-apply only for selects (sort) and checkboxes (facets); price
+			// number inputs keep their Apply button so typing doesn't fire early.
+			if ( ! t || ! t.matches || ! ( t.matches( 'select' ) || t.matches( 'input[type="checkbox"]' ) ) ) {
+				return;
+			}
+			var form = t.closest ? t.closest( 'form' ) : null;
 			if ( ! form ) {
 				return;
 			}
@@ -351,6 +395,7 @@
 			bindBrandFilter( root );
 			bindAutoSubmit( root );
 			if ( root.classList.contains( 'jpwbc-filterbar' ) ) {
+				bindAccordion( root );
 				bindFilterAjax( root );
 			}
 		} );

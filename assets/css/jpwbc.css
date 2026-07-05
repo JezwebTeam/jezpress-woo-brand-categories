@@ -515,6 +515,13 @@
 	display: none;
 }
 
+/* In AJAX mode, sort + facet checkboxes apply on change, so their manual
+ * buttons are redundant. The price Apply stays (typing shouldn't auto-fire). */
+.jpwbc-ajax-active .jpwbc-filter__apply--sort,
+.jpwbc-ajax-active .jpwbc-attr-form .jpwbc-filter__apply {
+	display: none;
+}
+
 .jpwbc-filter__clear {
 	color: var(--jpwbc-pink);
 	text-decoration: underline;

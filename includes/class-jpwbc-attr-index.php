@@ -822,15 +822,35 @@ class JPWBC_Attr_Index {
 				<td>
 					<?php
 					if ( ! empty( $state['updated'] ) ) {
-						$done = ! empty( $state['done'] );
-						echo esc_html(
-							sprintf(
-								/* translators: 1: complete/in-progress, 2: human time diff */
-								__( '%1$s — updated %2$s ago', 'jezpress-woo-brand-categories' ),
-								$done ? __( 'Complete', 'jezpress-woo-brand-categories' ) : __( 'In progress', 'jezpress-woo-brand-categories' ),
-								human_time_diff( (int) $state['updated'], time() )
-							)
-						);
+						$done   = ! empty( $state['done'] );
+						$counts = wp_count_posts( 'product' );
+						$total  = $counts instanceof \stdClass && isset( $counts->publish ) ? (int) $counts->publish : 0;
+						$offset = isset( $state['offset'] ) ? (int) $state['offset'] : 0;
+						$pct    = ( $total > 0 ) ? min( 100, (int) round( $offset / $total * 100 ) ) : ( $done ? 100 : 0 );
+
+						if ( $done ) {
+							echo esc_html(
+								sprintf(
+									/* translators: 1: product count, 2: human time diff */
+									__( 'Complete — %1$s products indexed, %2$s ago', 'jezpress-woo-brand-categories' ),
+									number_format_i18n( $total > 0 ? $total : $offset ),
+									human_time_diff( (int) $state['updated'], time() )
+								)
+							);
+						} else {
+							echo esc_html(
+								sprintf(
+									/* translators: 1: percent, 2: processed count, 3: total count */
+									__( 'In progress — %1$d%% (%2$s of ~%3$s products). Reload to refresh.', 'jezpress-woo-brand-categories' ),
+									$pct,
+									number_format_i18n( $offset ),
+									number_format_i18n( $total )
+								)
+							);
+							?>
+							<progress value="<?php echo esc_attr( (string) $pct ); ?>" max="100" style="width:220px;margin-left:8px;vertical-align:middle;"></progress>
+							<?php
+						}
 					} else {
 						esc_html_e( 'Never run', 'jezpress-woo-brand-categories' );
 					}
