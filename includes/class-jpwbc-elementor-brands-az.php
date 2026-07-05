@@ -329,6 +329,38 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->add_group_control(
+			\Elementor\Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'view_all_typography',
+				'label'    => __( '"View all" typography', 'jezpress-woo-brand-categories' ),
+				'selector' => '{{WRAPPER}} .jpwbc-allbrands__viewall > a',
+			)
+		);
+
+		$this->add_control(
+			'view_all_color',
+			array(
+				'label'     => __( '"View all" link colour', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-allbrands__viewall > a' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'view_all_hover_color',
+			array(
+				'label'     => __( '"View all" link hover colour', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-allbrands__viewall > a:hover' => 'color: {{VALUE}};',
+					'{{WRAPPER}} .jpwbc-allbrands__viewall > a:focus' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
