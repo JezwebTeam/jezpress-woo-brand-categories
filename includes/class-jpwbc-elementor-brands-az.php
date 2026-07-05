@@ -410,6 +410,19 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->add_responsive_control(
+			'groups_padding',
+			array(
+				'label'      => __( 'Brand list area padding', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'Padding around the grouped brand list (below the alphabet bar).', 'jezpress-woo-brand-categories' ),
+				'type'       => \Elementor\Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em', '%' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .jpwbc-az-groups' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
