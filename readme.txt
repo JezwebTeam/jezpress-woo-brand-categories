@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.16.1
+Stable tag: 1.17.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.17.0 =
+* New: optional value normalisation for attribute facets. Turn on "Fold colour values into base colours" (Brand Categories → Cache) and the index groups messy per-product colours ("1 WHITE", "101 WHITE", "320 DARK NAVY") into a tidy palette (White, Navy, …) so the Colour facet is clean and usable. Off by default; a rebuild applies it. Fully customisable via the `jpwbc_af_normalize_value` filter (map any raw value to any canonical label, for colour, size or any attribute).
 
 = 1.16.1 =
 * Fix: the price filter could show extra (empty) pagination pages on brands with variable products. Price filtering now uses WooCommerce's product lookup table (one row per product) instead of a `_price` meta query (which joined one row per variation and inflated the page count).
@@ -169,6 +172,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.17.0 =
+Adds optional colour-value normalisation for the attribute facets (fold "101 WHITE" → "White"). Enable it on the Cache tab and rebuild the index.
 
 = 1.16.1 =
 Fixes extra/empty pagination pages when filtering by price on brands with variable products.

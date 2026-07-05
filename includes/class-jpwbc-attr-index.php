@@ -64,6 +64,14 @@ class JPWBC_Attr_Index {
 	private const OPT_COUNTS_VER = 'jpwbc_af_counts_ver';
 
 	/**
+	 * Option: fold colour-like values into canonical base colours at index time.
+	 *
+	 * @since 1.17.0
+	 * @var string
+	 */
+	private const OPT_NORMALIZE = 'jpwbc_af_normalize';
+
+	/**
 	 * Cron hook for the batched backfill.
 	 *
 	 * @since 1.14.0
@@ -163,6 +171,127 @@ class JPWBC_Attr_Index {
 	 */
 	private function key_from_name( string $name ): string {
 		return substr( sanitize_key( $name ), 0, 20 );
+	}
+
+	/**
+	 * Whether value normalisation (colour folding) is enabled.
+	 *
+	 * @since 1.17.0
+	 *
+	 * @return bool
+	 */
+	private function normalize_enabled(): bool {
+		return (bool) get_option( self::OPT_NORMALIZE, false );
+	}
+
+	/**
+	 * Map a raw attribute value to a canonical facet value (or itself).
+	 *
+	 * Folds colour-like values ("1 WHITE", "101 WHITE", "320 DARK NAVY") into base
+	 * colours so the facet lists a tidy palette instead of hundreds of one-offs.
+	 * Fully overridable per value via the jpwbc_af_normalize_value filter.
+	 *
+	 * @since 1.17.0
+	 *
+	 * @param string $raw   Raw value.
+	 * @param string $key   Attribute key.
+	 * @param string $label Attribute label.
+	 * @return string
+	 */
+	private function canonical_value( string $raw, string $key, string $label ): string {
+		if ( ! $this->normalize_enabled() ) {
+			return $raw;
+		}
+		$canonical = $this->default_canonical( $raw, $key, $label );
+
+		/**
+		 * Filter the canonical (grouped) value for a raw attribute value. Return a
+		 * label to fold this value into, or '' to keep the raw value as-is.
+		 *
+		 * @since 1.17.0
+		 *
+		 * @param string $canonical Default canonical value ('' = keep raw).
+		 * @param string $raw       Raw value.
+		 * @param string $key       Attribute key.
+		 */
+		$canonical = (string) apply_filters( 'jpwbc_af_normalize_value', $canonical, $raw, $key );
+
+		return '' !== $canonical ? $canonical : $raw;
+	}
+
+	/**
+	 * Built-in canonical mapping: base-colour folding for colour-like attributes.
+	 *
+	 * @since 1.17.0
+	 *
+	 * @param string $raw   Raw value.
+	 * @param string $key   Attribute key.
+	 * @param string $label Attribute label.
+	 * @return string Canonical value, or '' to keep the raw value.
+	 */
+	private function default_canonical( string $raw, string $key, string $label ): string {
+		$is_colour = ( 'colour' === $key || 'color' === $key
+			|| false !== stripos( $label, 'colour' ) || false !== stripos( $label, 'color' ) );
+		if ( ! $is_colour ) {
+			return '';
+		}
+
+		$hay = strtolower( $raw );
+
+		// Keyword => canonical, ordered so specific shades resolve before generics.
+		$map = array(
+			'rose gold' => 'Rose Gold',
+			'navy'      => 'Navy',
+			'royal'     => 'Blue',
+			'turquoise' => 'Turquoise',
+			'aqua'      => 'Aqua',
+			'teal'      => 'Teal',
+			'blue'      => 'Blue',
+			'off white' => 'White',
+			'white'     => 'White',
+			'cream'     => 'Cream',
+			'ivory'     => 'Ivory',
+			'black'     => 'Black',
+			'charcoal'  => 'Grey',
+			'grey'      => 'Grey',
+			'gray'      => 'Grey',
+			'silver'    => 'Silver',
+			'gold'      => 'Gold',
+			'fuchsia'   => 'Pink',
+			'pink'      => 'Pink',
+			'rose'      => 'Pink',
+			'scarlet'   => 'Red',
+			'red'       => 'Red',
+			'burgundy'  => 'Wine',
+			'wine'      => 'Wine',
+			'emerald'   => 'Green',
+			'olive'     => 'Green',
+			'green'     => 'Green',
+			'aubergine' => 'Purple',
+			'eggplant'  => 'Purple',
+			'helio'     => 'Purple',
+			'purple'    => 'Purple',
+			'chocolate' => 'Brown',
+			'brown'     => 'Brown',
+			'beige'     => 'Beige',
+			'natural'   => 'Natural',
+			'nude'      => 'Nude',
+			'peach'     => 'Peach',
+			'orange'    => 'Orange',
+			'mustard'   => 'Yellow',
+			'maize'     => 'Yellow',
+			'curry'     => 'Yellow',
+			'yellow'    => 'Yellow',
+			'mint'      => 'Mint',
+		);
+
+		foreach ( $map as $needle => $canonical ) {
+			if ( false !== strpos( $hay, $needle ) ) {
+				return $canonical;
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -295,7 +424,7 @@ class JPWBC_Attr_Index {
 			}
 			$this->register_one( $key, $name );
 
-			$values = array_values(
+			$raw_values = array_values(
 				array_filter(
 					array_map( 'trim', explode( '|', (string) ( $attr['value'] ?? '' ) ) ),
 					static function ( $v ): bool {
@@ -303,6 +432,13 @@ class JPWBC_Attr_Index {
 					}
 				)
 			);
+
+			// Fold each raw value to its canonical facet value (or itself), dedup.
+			$values = array();
+			foreach ( $raw_values as $rv ) {
+				$values[] = $this->canonical_value( $rv, $key, $name );
+			}
+			$values = array_values( array_unique( $values ) );
 
 			wp_set_object_terms( $product_id, $values, $this->taxonomy_for( $key ), false );
 			$touched[ $key ] = true;
@@ -858,10 +994,16 @@ class JPWBC_Attr_Index {
 				</td>
 			</tr>
 		</table>
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+		<p>
+			<label>
+				<input type="checkbox" form="jpwbc-attr-rebuild-form" name="jpwbc_af_normalize" value="1" <?php checked( $this->normalize_enabled() ); ?>>
+				<?php esc_html_e( 'Fold colour values into base colours (e.g. "101 WHITE" → "White"). Requires a rebuild to apply.', 'jezpress-woo-brand-categories' ); ?>
+			</label>
+		</p>
+		<form id="jpwbc-attr-rebuild-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( 'jpwbc_rebuild_attr_index' ); ?>
 			<input type="hidden" name="action" value="jpwbc_rebuild_attr_index">
-			<?php submit_button( __( 'Rebuild attribute index', 'jezpress-woo-brand-categories' ), 'secondary' ); ?>
+			<?php submit_button( __( 'Save & rebuild attribute index', 'jezpress-woo-brand-categories' ), 'secondary' ); ?>
 		</form>
 		<?php
 	}
@@ -876,6 +1018,9 @@ class JPWBC_Attr_Index {
 			wp_die( esc_html__( 'Permission denied.', 'jezpress-woo-brand-categories' ), 403 );
 		}
 		check_admin_referer( 'jpwbc_rebuild_attr_index' );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified via check_admin_referer above.
+		update_option( self::OPT_NORMALIZE, isset( $_POST['jpwbc_af_normalize'] ), false );
 
 		$this->start_rebuild();
 

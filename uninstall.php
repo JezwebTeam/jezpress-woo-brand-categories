@@ -27,6 +27,8 @@ $options = array(
 	// Attribute-facet indexer (1.14.0+).
 	'jpwbc_af_attributes',
 	'jpwbc_af_index_state',
+	'jpwbc_af_counts_ver',
+	'jpwbc_af_normalize',
 	// Legacy keys from older builds (harmless if absent).
 	'jpwbc_license_key',
 	'jpwbc_license_data',
