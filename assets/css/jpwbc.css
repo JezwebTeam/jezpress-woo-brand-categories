@@ -680,6 +680,211 @@
 	font-size: 0.95em;
 }
 
+/* Mobile trigger buttons + drawer chrome are desktop-hidden by default. */
+.jpwbc-mobilebar,
+.jpwbc-filterbar__head,
+.jpwbc-filterbar__foot {
+	display: none;
+}
+
+.jpwbc-filter-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	background: rgba( 0, 0, 0, 0.45 );
+}
+
+/* Floating "Filter" button — appears (JS removes [hidden]) once the bar scrolls
+ * out of view; click scrolls back to it (desktop) or opens the drawer (mobile). */
+.jpwbc-filter-jump {
+	position: fixed;
+	top: 90px;
+	left: 20px;
+	z-index: 950;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.7em 1.3em;
+	border: 0;
+	border-radius: 999px;
+	background: var(--jpwbc-pink);
+	color: #fff;
+	font-weight: 600;
+	cursor: pointer;
+	box-shadow: 0 4px 14px rgba( 0, 0, 0, 0.22 );
+}
+
+.jpwbc-filter-jump[hidden] {
+	display: none;
+}
+
+.jpwbc-filter-jump__icon,
+.jpwbc-mobilebar__icon {
+	width: 14px;
+	height: 10px;
+	border-top: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	position: relative;
+}
+
+body.jpwbc-drawer-lock {
+	overflow: hidden;
+}
+
+/* ---- Mobile: collapse the pill bar into "Filter" + "Sort" buttons + drawer ---- */
+@media ( max-width: 768px ) {
+	.jpwbc-mobilebar {
+		display: flex;
+		gap: 0.6em;
+		margin: 0 0 1em;
+	}
+
+	.jpwbc-mobilebar__btn {
+		flex: 1 1 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5em;
+		padding: 0.85em 1em;
+		border: 1px solid #d7d7db;
+		border-radius: 999px;
+		background: #fff;
+		font-weight: 600;
+		font-size: 1em;
+		cursor: pointer;
+	}
+
+	/* The bar becomes an off-canvas drawer, hidden until opened. */
+	.jpwbc-filterbar {
+		position: fixed;
+		inset: 0;
+		left: auto;
+		width: min( 88vw, 380px );
+		z-index: 1001;
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		margin: 0;
+		padding: 0;
+		background: #fff;
+		transform: translateX( 100% );
+		transition: transform 0.25s ease;
+		visibility: hidden;
+		overflow-y: auto;
+	}
+
+	.jpwbc-filterbar.jpwbc-drawer-open {
+		transform: none;
+		visibility: visible;
+	}
+
+	.jpwbc-filterbar__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1em 1.1em;
+		border-bottom: 1px solid var(--jpwbc-border);
+		position: sticky;
+		top: 0;
+		background: #fff;
+		z-index: 1;
+	}
+
+	.jpwbc-filterbar__title {
+		font-weight: 700;
+		font-size: 1.1em;
+	}
+
+	.jpwbc-filterbar__close {
+		border: 0;
+		background: none;
+		font-size: 1.8em;
+		line-height: 1;
+		cursor: pointer;
+		padding: 0 0.2em;
+	}
+
+	.jpwbc-filterbar__foot {
+		display: flex;
+		align-items: center;
+		gap: 0.9em;
+		padding: 1em 1.1em;
+		border-top: 1px solid var(--jpwbc-border);
+		position: sticky;
+		bottom: 0;
+		background: #fff;
+		margin-top: auto;
+	}
+
+	.jpwbc-filterbar__clearall {
+		color: var(--jpwbc-pink);
+		text-decoration: underline;
+		white-space: nowrap;
+	}
+
+	.jpwbc-filterbar__done {
+		flex: 1 1 auto;
+		padding: 0.95em;
+		border: 0;
+		border-radius: 8px;
+		background: var(--jpwbc-pink);
+		color: #fff;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	/* Filters become full-width accordion rows inside the drawer. */
+	.jpwbc-filter {
+		width: 100%;
+		border-bottom: 1px solid var(--jpwbc-border);
+	}
+
+	.jpwbc-filter__toggle {
+		border: 0;
+		border-radius: 0;
+		width: 100%;
+		justify-content: space-between;
+		padding: 1em 1.1em;
+		font-size: 1em;
+	}
+
+	.jpwbc-filter[open] > .jpwbc-filter__toggle {
+		box-shadow: none;
+	}
+
+	.jpwbc-filter__panel {
+		position: static;
+		box-shadow: none;
+		border: 0;
+		border-radius: 0;
+		min-width: 0;
+		max-height: none;
+		padding: 0 1.1em 0.9em;
+	}
+
+	.jpwbc-filter--price .jpwbc-filter__panel {
+		min-width: 0;
+	}
+
+	/* The desktop inline "Clear filters" is replaced by the drawer footer. */
+	.jpwbc-filter__clear {
+		display: none;
+	}
+
+	/* "Filter" drawer hides Sort; "Sort" drawer shows only the sort options. */
+	.jpwbc-filterbar.jpwbc-drawer-filter .jpwbc-filter--sort {
+		display: none;
+	}
+
+	.jpwbc-filterbar.jpwbc-drawer-sort .jpwbc-filter:not( .jpwbc-filter--sort ) {
+		display: none;
+	}
+
+	.jpwbc-filterbar.jpwbc-drawer-sort .jpwbc-filterbar__clearall {
+		visibility: hidden;
+	}
+}
+
 /* AJAX loading state on the product grid being refreshed. */
 .jpwbc-loading-grid {
 	position: relative;

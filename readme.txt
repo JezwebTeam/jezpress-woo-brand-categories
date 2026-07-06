@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.18.3
+Stable tag: 1.19.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,10 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.19.0 =
+* New: a floating "Filter" button appears once you scroll past the filter bar; clicking it scrolls back up to the filters (or opens the filter drawer on mobile).
+* New: on mobile the filter bar collapses into two buttons — "Filter" (opens a slide-in drawer with all the facets: Category, Colour/Size/Style, Price, plus Clear all / Show results) and "Sort" (opens the sort options) — matching modern mobile shop filters.
 
 = 1.18.3 =
 * Fix: when an attribute facet narrowed the results (e.g. to 2 products), the product grid filtered correctly but the pagination still showed all the brand's pages. The facet filter now also applies to the Elementor Products widget's own query that drives pagination, so the page count matches the filtered results.
@@ -188,6 +192,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.19.0 =
+Adds a floating "Filter" button and a mobile Filter/Sort drawer. Hard-refresh once so the new script/styles load.
 
 = 1.18.3 =
 Fixes pagination showing extra pages when an attribute facet filters the results.

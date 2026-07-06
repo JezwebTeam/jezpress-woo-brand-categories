@@ -341,10 +341,12 @@
 					swap( resultsSel, doc );
 					extraSel.forEach( function ( s ) { swap( s, doc ); } );
 
-					// Replace the filter bar, preserving which dropdowns were open.
-					var wasOpen = openKeys( bar );
-					var nextBar = doc.querySelector( '.jpwbc-filterbar' );
-					var liveBar = bar;
+					// Replace the filter bar, preserving open dropdowns + mobile drawer state.
+					var wasOpen   = openKeys( bar );
+					var wasDrawer = bar.classList.contains( 'jpwbc-drawer-open' );
+					var wasSort   = bar.classList.contains( 'jpwbc-drawer-sort' );
+					var nextBar   = doc.querySelector( '.jpwbc-filterbar' );
+					var liveBar   = bar;
 					if ( nextBar && bar.parentNode ) {
 						bar.parentNode.replaceChild( nextBar, bar );
 						liveBar = nextBar;
@@ -354,6 +356,11 @@
 								d.open = true;
 							}
 						} );
+						if ( wasDrawer ) {
+							nextBar.classList.add( 'jpwbc-drawer-open' );
+							nextBar.classList.toggle( 'jpwbc-drawer-sort', wasSort );
+							nextBar.classList.toggle( 'jpwbc-drawer-filter', ! wasSort );
+						}
 						bindFilterAjax( liveBar );
 						bindAccordion( liveBar );
 						bindPriceSlider( liveBar );
@@ -363,8 +370,9 @@
 						window.history.pushState( { jpwbcAjax: 1 }, '', url );
 					}
 
+					// Don't yank the page while the mobile drawer is open.
 					var top = document.querySelector( resultsSel );
-					if ( top && top.scrollIntoView ) {
+					if ( top && top.scrollIntoView && ! ( liveBar && liveBar.classList.contains( 'jpwbc-drawer-open' ) ) ) {
 						top.scrollIntoView( { behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' } );
 					}
 				} )
@@ -448,6 +456,85 @@
 		} );
 	}
 
+	// Mobile drawer: the "Filter"/"Sort" buttons open the filter bar as a slide-in
+	// panel; the close button, backdrop and "Show results" close it. Bound once at
+	// document level so it survives AJAX bar swaps.
+	function setDrawer( open, mode ) {
+		var bar      = document.querySelector( '.jpwbc-filterbar' );
+		var backdrop = document.querySelector( '.jpwbc-filter-backdrop' );
+		if ( ! bar ) {
+			return;
+		}
+		if ( open ) {
+			bar.classList.add( 'jpwbc-drawer-open' );
+			bar.classList.toggle( 'jpwbc-drawer-sort', 'sort' === mode );
+			bar.classList.toggle( 'jpwbc-drawer-filter', 'sort' !== mode );
+			if ( backdrop ) { backdrop.hidden = false; }
+			document.body.classList.add( 'jpwbc-drawer-lock' );
+			// Sort drawer: show the options straight away (like a sort sheet).
+			if ( 'sort' === mode ) {
+				var sortEl = bar.querySelector( '.jpwbc-filter--sort' );
+				if ( sortEl ) { sortEl.open = true; }
+			}
+		} else {
+			bar.classList.remove( 'jpwbc-drawer-open', 'jpwbc-drawer-sort', 'jpwbc-drawer-filter' );
+			if ( backdrop ) { backdrop.hidden = true; }
+			document.body.classList.remove( 'jpwbc-drawer-lock' );
+		}
+	}
+
+	function bindMobileDrawer() {
+		document.addEventListener( 'click', function ( e ) {
+			var opener = e.target.closest ? e.target.closest( '[data-jpwbc-open]' ) : null;
+			if ( opener ) {
+				e.preventDefault();
+				setDrawer( true, opener.getAttribute( 'data-jpwbc-open' ) );
+				return;
+			}
+			var closer = e.target.closest ? e.target.closest( '[data-jpwbc-close]' ) : null;
+			if ( closer ) {
+				e.preventDefault();
+				setDrawer( false );
+			}
+		} );
+		document.addEventListener( 'keydown', function ( e ) {
+			if ( 'Escape' === e.key ) { setDrawer( false ); }
+		} );
+	}
+
+	// Floating "Filter" button: appears once the filter bar scrolls out of view;
+	// click scrolls back to it (desktop) or opens the drawer (mobile).
+	function bindFilterJump() {
+		var jump = document.querySelector( '.jpwbc-filter-jump' );
+		if ( ! jump ) {
+			return;
+		}
+		var ticking = false;
+		function update() {
+			ticking = false;
+			var bar = document.querySelector( '.jpwbc-filterbar' );
+			if ( ! bar ) { jump.hidden = true; return; }
+			var r = bar.getBoundingClientRect();
+			jump.hidden = ! ( r.bottom < 10 ); // bar scrolled above the viewport top.
+		}
+		function onScroll() {
+			if ( ! ticking ) { ticking = true; window.requestAnimationFrame( update ); }
+		}
+		window.addEventListener( 'scroll', onScroll, { passive: true } );
+		window.addEventListener( 'resize', onScroll );
+		jump.addEventListener( 'click', function () {
+			if ( window.matchMedia && window.matchMedia( '(max-width: 768px)' ).matches ) {
+				setDrawer( true, 'filter' );
+				return;
+			}
+			var bar = document.querySelector( '.jpwbc-filterbar' );
+			if ( bar && bar.scrollIntoView ) {
+				bar.scrollIntoView( { behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' } );
+			}
+		} );
+		update();
+	}
+
 	ready( function () {
 		var roots = document.querySelectorAll( '.jpwbc-brand-cats' );
 		Array.prototype.forEach.call( roots, function ( root ) {
@@ -466,5 +553,8 @@
 		} );
 
 		document.addEventListener( 'click', trackClick, true );
+
+		bindMobileDrawer();
+		bindFilterJump();
 	} );
 }() );

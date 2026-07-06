@@ -107,7 +107,21 @@ if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt && empty( $jpwbc
 	return;
 }
 ?>
+<div class="jpwbc-mobilebar" aria-hidden="true">
+	<button type="button" class="jpwbc-mobilebar__btn jpwbc-mobilebar__filter" data-jpwbc-open="filter">
+		<span class="jpwbc-mobilebar__icon" aria-hidden="true"></span><?php esc_html_e( 'Filter', 'jezpress-woo-brand-categories' ); ?>
+	</button>
+	<button type="button" class="jpwbc-mobilebar__btn jpwbc-mobilebar__sort" data-jpwbc-open="sort">
+		<?php esc_html_e( 'Sort', 'jezpress-woo-brand-categories' ); ?>
+	</button>
+</div>
+
 <div class="jpwbc-brand-cats jpwbc-filterbar" data-jpwbc-ajax="<?php echo $jpwbc_ajax ? '1' : '0'; ?>" data-jpwbc-results="<?php echo esc_attr( $jpwbc_res_sel ); ?>">
+
+	<div class="jpwbc-filterbar__head">
+		<span class="jpwbc-filterbar__title"><?php esc_html_e( 'Filters', 'jezpress-woo-brand-categories' ); ?></span>
+		<button type="button" class="jpwbc-filterbar__close" data-jpwbc-close aria-label="<?php esc_attr_e( 'Close filters', 'jezpress-woo-brand-categories' ); ?>">&times;</button>
+	</div>
 
 	<?php if ( $jpwbc_show_cat && ! empty( $jpwbc_cats ) ) : ?>
 		<details class="jpwbc-filter jpwbc-filter--category" data-jpwbc-facet="category">
@@ -300,4 +314,15 @@ if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt && empty( $jpwbc
 		<a class="jpwbc-filter__clear" href="<?php echo esc_url( $jpwbc_base ); ?>"><?php esc_html_e( 'Clear filters', 'jezpress-woo-brand-categories' ); ?></a>
 	<?php endif; ?>
 
+	<div class="jpwbc-filterbar__foot">
+		<a class="jpwbc-filterbar__clearall" href="<?php echo esc_url( $jpwbc_base ); ?>"><?php esc_html_e( 'Clear all', 'jezpress-woo-brand-categories' ); ?></a>
+		<button type="button" class="jpwbc-filterbar__done" data-jpwbc-close><?php esc_html_e( 'Show results', 'jezpress-woo-brand-categories' ); ?></button>
+	</div>
+
 </div>
+
+<div class="jpwbc-filter-backdrop" data-jpwbc-close hidden></div>
+
+<button type="button" class="jpwbc-filter-jump" aria-label="<?php esc_attr_e( 'Jump to filters', 'jezpress-woo-brand-categories' ); ?>" hidden>
+	<span class="jpwbc-filter-jump__icon" aria-hidden="true"></span><?php esc_html_e( 'Filter', 'jezpress-woo-brand-categories' ); ?>
+</button>
