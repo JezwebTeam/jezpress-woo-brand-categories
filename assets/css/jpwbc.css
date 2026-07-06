@@ -341,9 +341,13 @@
 	position: relative;
 }
 
+/* Reset theme form margins inside the bar (kept the sort control aligned). */
+.jpwbc-filterbar form {
+	margin: 0;
+}
+
 /* Each control looks like an outlined pill button. */
-.jpwbc-filter__toggle,
-.jpwbc-filter--sort {
+.jpwbc-filter__toggle {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5em;
@@ -359,7 +363,6 @@
 }
 
 .jpwbc-filter__toggle:hover,
-.jpwbc-filter--sort:hover,
 .jpwbc-filter__toggle:focus-visible {
 	border-color: #111;
 }

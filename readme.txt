@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.18.1
+Stable tag: 1.18.2
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.18.2 =
+* Improve: the "Sort by" control is now a custom styled dropdown (matching the other filter dropdowns) instead of a native select, so its options are properly themed. Also fixed an extra gap under the Sort control caused by a theme's default form margin.
 
 = 1.18.1 =
 * Improve: refined the Brand Filter Bar styling to match a modern faceted-filter look — cleaner pill controls with hover/open states, softer rounded dropdown panels, custom circular checkboxes for attribute options, and lighter per-option counts.
@@ -182,6 +185,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.18.2 =
+Styles the "Sort by" dropdown to match the other filters and removes an extra gap under it. Hard-refresh once.
 
 = 1.18.1 =
 Visual polish for the Brand Filter Bar (cleaner pills, panels and circular checkboxes). Hard-refresh once so the new styles load.

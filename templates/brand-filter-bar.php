@@ -260,21 +260,40 @@ if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt && empty( $jpwbc
 	<?php endif; ?>
 
 	<?php if ( $jpwbc_show_srt && ! empty( $jpwbc_sorts ) ) : ?>
-		<form class="jpwbc-filter jpwbc-filter--sort jpwbc-autosubmit" method="get" action="<?php echo esc_url( $jpwbc_base ); ?>">
-			<label class="jpwbc-sort">
+		<?php
+		$jpwbc_cur_sort  = '' !== $jpwbc_sort ? $jpwbc_sort : 'menu_order';
+		$jpwbc_sort_lbl  = isset( $jpwbc_sorts[ $jpwbc_cur_sort ] ) ? (string) $jpwbc_sorts[ $jpwbc_cur_sort ] : (string) reset( $jpwbc_sorts );
+		?>
+		<details class="jpwbc-filter jpwbc-filter--sort" data-jpwbc-facet="sort">
+			<summary class="jpwbc-filter__toggle">
 				<span class="jpwbc-filter__label"><?php esc_html_e( 'Sort by', 'jezpress-woo-brand-categories' ); ?></span>
-				<select name="orderby" class="jpwbc-sort__select">
+				<span class="jpwbc-filter__value"><?php echo esc_html( $jpwbc_sort_lbl ); ?></span>
+			</summary>
+			<div class="jpwbc-filter__panel">
+				<ul class="jpwbc-filter__list">
 					<?php foreach ( $jpwbc_sorts as $jpwbc_key => $jpwbc_lbl ) : ?>
-						<?php $jpwbc_sel = ( (string) $jpwbc_key === $jpwbc_sort ) || ( '' === $jpwbc_sort && 'menu_order' === $jpwbc_key ); ?>
-						<option value="<?php echo esc_attr( (string) $jpwbc_key ); ?>" <?php selected( $jpwbc_sel ); ?>>
-							<?php echo esc_html( (string) $jpwbc_lbl ); ?>
-						</option>
+						<?php
+						// Sort links preserve price + facets; orderby is dropped for the
+						// default (menu_order = Recommended) so it stays a clean URL.
+						$jpwbc_sort_args = $jpwbc_preserve;
+						unset( $jpwbc_sort_args['orderby'] );
+						if ( 'menu_order' !== $jpwbc_key ) {
+							$jpwbc_sort_args['orderby'] = $jpwbc_key;
+						}
+						$jpwbc_sort_url    = add_query_arg( $jpwbc_sort_args, $jpwbc_base );
+						$jpwbc_sort_active = ( (string) $jpwbc_key === $jpwbc_cur_sort );
+						?>
+						<li>
+							<a class="jpwbc-filter__opt<?php echo $jpwbc_sort_active ? ' is-active' : ''; ?>"
+								href="<?php echo esc_url( $jpwbc_sort_url ); ?>"
+								<?php echo $jpwbc_sort_active ? 'aria-current="true"' : ''; ?>>
+								<span class="jpwbc-filter__opt-name"><?php echo esc_html( (string) $jpwbc_lbl ); ?></span>
+							</a>
+						</li>
 					<?php endforeach; ?>
-				</select>
-			</label>
-			<?php $jpwbc_hidden( array( 'orderby' ) ); ?>
-			<button type="submit" class="jpwbc-filter__apply jpwbc-filter__apply--sort"><?php esc_html_e( 'Go', 'jezpress-woo-brand-categories' ); ?></button>
-		</form>
+				</ul>
+			</div>
+		</details>
 	<?php endif; ?>
 
 	<?php if ( ! empty( $jpwbc_preserve ) ) : ?>
