@@ -189,6 +189,69 @@
 		} );
 	}
 
+	// Filter bar: dual-handle price range slider, synced two-way with the
+	// min/max number inputs (which are what actually submit). Progressive
+	// enhancement — the number inputs work on their own without JS.
+	function bindPriceSlider( bar ) {
+		var sliders = bar.querySelectorAll( '.jpwbc-price-slider' );
+		Array.prototype.forEach.call( sliders, function ( slider ) {
+			var lower = slider.querySelector( '.jpwbc-price-slider__lower' );
+			var upper = slider.querySelector( '.jpwbc-price-slider__upper' );
+			var fill  = slider.querySelector( '.jpwbc-price-slider__fill' );
+			var form  = slider.closest( 'form' );
+			if ( ! lower || ! upper || ! form ) {
+				return;
+			}
+			var numMin = form.querySelector( 'input[name="jpwbc_min_price"]' );
+			var numMax = form.querySelector( 'input[name="jpwbc_max_price"]' );
+			var min    = parseFloat( slider.getAttribute( 'data-min' ) ) || 0;
+			var max    = parseFloat( slider.getAttribute( 'data-max' ) ) || 100;
+			var span   = ( max - min ) || 1;
+
+			function paint() {
+				var lo = parseFloat( lower.value );
+				var hi = parseFloat( upper.value );
+				if ( lo > hi ) { var t = lo; lo = hi; hi = t; }
+				if ( fill ) {
+					fill.style.left  = ( ( lo - min ) / span * 100 ) + '%';
+					fill.style.right = ( ( max - hi ) / span * 100 ) + '%';
+				}
+			}
+
+			// Slider -> number inputs.
+			lower.addEventListener( 'input', function () {
+				if ( parseFloat( lower.value ) > parseFloat( upper.value ) ) {
+					lower.value = upper.value;
+				}
+				if ( numMin ) { numMin.value = lower.value; }
+				paint();
+			} );
+			upper.addEventListener( 'input', function () {
+				if ( parseFloat( upper.value ) < parseFloat( lower.value ) ) {
+					upper.value = lower.value;
+				}
+				if ( numMax ) { numMax.value = upper.value; }
+				paint();
+			} );
+
+			// Number inputs -> slider.
+			if ( numMin ) {
+				numMin.addEventListener( 'input', function () {
+					var v = parseFloat( numMin.value );
+					if ( ! isNaN( v ) ) { lower.value = Math.min( Math.max( v, min ), max ); paint(); }
+				} );
+			}
+			if ( numMax ) {
+				numMax.addEventListener( 'input', function () {
+					var v = parseFloat( numMax.value );
+					if ( ! isNaN( v ) ) { upper.value = Math.min( Math.max( v, min ), max ); paint(); }
+				} );
+			}
+
+			paint();
+		} );
+	}
+
 	// Filter bar: only one dropdown open at a time (accordion). Works with or
 	// without AJAX. Re-applied to the fresh bar after each AJAX swap.
 	function bindAccordion( bar ) {
@@ -293,6 +356,7 @@
 						} );
 						bindFilterAjax( liveBar );
 						bindAccordion( liveBar );
+						bindPriceSlider( liveBar );
 					}
 
 					if ( push ) {
@@ -396,6 +460,7 @@
 			bindAutoSubmit( root );
 			if ( root.classList.contains( 'jpwbc-filterbar' ) ) {
 				bindAccordion( root );
+				bindPriceSlider( root );
 				bindFilterAjax( root );
 			}
 		} );

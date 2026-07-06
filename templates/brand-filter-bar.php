@@ -233,6 +233,25 @@ if ( ! $jpwbc_show_cat && ! $jpwbc_show_pr && ! $jpwbc_show_srt && empty( $jpwbc
 								value="<?php echo null !== $jpwbc_max ? esc_attr( (string) (int) $jpwbc_max ) : ''; ?>">
 						</label>
 					</div>
+
+					<?php if ( $jpwbc_range_max > $jpwbc_range_min ) : ?>
+						<div class="jpwbc-price-slider"
+							data-min="<?php echo esc_attr( (string) $jpwbc_range_min ); ?>"
+							data-max="<?php echo esc_attr( (string) $jpwbc_range_max ); ?>">
+							<div class="jpwbc-price-slider__track"><span class="jpwbc-price-slider__fill"></span></div>
+							<input type="range" class="jpwbc-price-slider__lower" aria-label="<?php esc_attr_e( 'Minimum price', 'jezpress-woo-brand-categories' ); ?>"
+								min="<?php echo esc_attr( (string) $jpwbc_range_min ); ?>" max="<?php echo esc_attr( (string) $jpwbc_range_max ); ?>" step="1"
+								value="<?php echo esc_attr( (string) ( null !== $jpwbc_min ? (int) $jpwbc_min : $jpwbc_range_min ) ); ?>">
+							<input type="range" class="jpwbc-price-slider__upper" aria-label="<?php esc_attr_e( 'Maximum price', 'jezpress-woo-brand-categories' ); ?>"
+								min="<?php echo esc_attr( (string) $jpwbc_range_min ); ?>" max="<?php echo esc_attr( (string) $jpwbc_range_max ); ?>" step="1"
+								value="<?php echo esc_attr( (string) ( null !== $jpwbc_max ? (int) $jpwbc_max : $jpwbc_range_max ) ); ?>">
+						</div>
+						<div class="jpwbc-price-slider__bounds" aria-hidden="true">
+							<span>$<?php echo esc_html( (string) $jpwbc_range_min ); ?></span>
+							<span>$<?php echo esc_html( (string) $jpwbc_range_max ); ?></span>
+						</div>
+					<?php endif; ?>
+
 					<?php $jpwbc_hidden( array( 'jpwbc_min_price', 'jpwbc_max_price' ) ); ?>
 					<button type="submit" class="jpwbc-filter__apply"><?php esc_html_e( 'Apply', 'jezpress-woo-brand-categories' ); ?></button>
 				</form>

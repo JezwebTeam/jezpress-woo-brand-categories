@@ -461,29 +461,116 @@
 }
 
 /* Price form. */
+.jpwbc-filter--price .jpwbc-filter__panel {
+	min-width: 300px;
+}
+
 .jpwbc-price-fields {
 	display: flex;
 	align-items: center;
-	gap: 0.5em;
-	margin-bottom: 0.6em;
+	gap: 0.6em;
+	margin-bottom: 0.8em;
+}
+
+.jpwbc-price-field {
+	flex: 1 1 0;
 }
 
 .jpwbc-price-field input {
-	width: 6.5em;
-	padding: 0.45em 0.6em;
+	width: 100%;
+	padding: 0.55em 0.7em;
 	border: 1px solid var(--jpwbc-border);
-	border-radius: 4px;
+	border-radius: 6px;
 	box-sizing: border-box;
 }
 
 .jpwbc-filter__apply {
-	padding: 0.5em 1.1em;
+	padding: 0.6em 1.4em;
 	border: 0;
 	border-radius: 999px;
 	background: var(--jpwbc-pink);
 	color: #fff;
 	font-weight: 600;
 	cursor: pointer;
+	width: 100%;
+}
+
+/* Dual-handle price range slider (Aesop/Radley style). Two range inputs are
+ * overlaid on one track; a fill span shows the selected span between them. */
+.jpwbc-price-slider {
+	position: relative;
+	height: 28px;
+	margin: 0.2em 0 0.4em;
+}
+
+.jpwbc-price-slider__track {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	height: 4px;
+	transform: translateY( -50% );
+	background: var(--jpwbc-border);
+	border-radius: 4px;
+}
+
+.jpwbc-price-slider__fill {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: #111;
+	border-radius: 4px;
+}
+
+.jpwbc-price-slider input[type="range"] {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	width: 100%;
+	margin: 0;
+	height: 28px;
+	background: none;
+	pointer-events: none;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.jpwbc-price-slider input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	pointer-events: auto;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #fff;
+	border: 2px solid #111;
+	cursor: pointer;
+	box-shadow: 0 1px 3px rgba( 0, 0, 0, 0.2 );
+}
+
+.jpwbc-price-slider input[type="range"]::-moz-range-thumb {
+	pointer-events: auto;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #fff;
+	border: 2px solid #111;
+	cursor: pointer;
+}
+
+.jpwbc-price-slider input[type="range"]::-webkit-slider-runnable-track {
+	background: none;
+}
+
+.jpwbc-price-slider__bounds {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.85em;
+	color: #6b6b70;
+	margin-bottom: 0.7em;
 }
 
 .jpwbc-filter__apply:hover,

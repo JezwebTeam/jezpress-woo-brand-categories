@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.17.1
+Stable tag: 1.18.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,10 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.18.0 =
+* New: the Price filter now has a dual-handle range slider (with min/max input boxes and an Apply button), matching modern shop filters. The slider is bounded by the brand's actual price range and stays in sync with the boxes; it's a progressive enhancement over the plain inputs (which still work without JavaScript).
+* Improve: filter-bar styling polished (rounded inputs, full-width Apply) to better match a modern faceted-filter look.
 
 = 1.17.1 =
 * Fix: filters (attribute facets + price) now actually filter the product grid when the archive uses Elementor's "Products (Current Query)" widget. That widget runs its own query via WooCommerce's product-shortcode renderer rather than the page's main query, so the filters weren't being applied to it. They now hook that query too (via `woocommerce_shortcode_products_query` and the product lookup join), while still working with themes that use the native archive loop.
@@ -175,6 +179,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.18.0 =
+Adds a dual-handle price range slider to the Brand Filter Bar. Hard-refresh once so the new script/styles load.
 
 = 1.17.1 =
 Fixes filters not affecting the grid on archives built with Elementor's "Products (Current Query)" widget.
