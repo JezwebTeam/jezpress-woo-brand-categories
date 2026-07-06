@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.18.0
+Stable tag: 1.18.1
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.18.1 =
+* Improve: refined the Brand Filter Bar styling to match a modern faceted-filter look — cleaner pill controls with hover/open states, softer rounded dropdown panels, custom circular checkboxes for attribute options, and lighter per-option counts.
 
 = 1.18.0 =
 * New: the Price filter now has a dual-handle range slider (with min/max input boxes and an Apply button), matching modern shop filters. The slider is bounded by the brand's actual price range and stays in sync with the boxes; it's a progressive enhancement over the plain inputs (which still work without JavaScript).
@@ -179,6 +182,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.18.1 =
+Visual polish for the Brand Filter Bar (cleaner pills, panels and circular checkboxes). Hard-refresh once so the new styles load.
 
 = 1.18.0 =
 Adds a dual-handle price range slider to the Brand Filter Bar. Hard-refresh once so the new script/styles load.
