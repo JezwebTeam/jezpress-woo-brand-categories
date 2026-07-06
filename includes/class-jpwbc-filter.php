@@ -214,11 +214,13 @@ class JPWBC_Filter {
 		if ( ! is_array( $clauses ) || ! $q instanceof \WP_Query ) {
 			return $clauses;
 		}
-		if ( is_admin() || ! $q->is_main_query() || ! jpwbc_woocommerce_ready() ) {
+		if ( is_admin() || ! jpwbc_woocommerce_ready() || ! is_tax( JPWBC_BRAND_TAXONOMY ) ) {
 			return $clauses;
 		}
-		// Only on a product_brand archive query (mirrors JPWBC_Rewrites' detection).
-		if ( '' === (string) $q->get( JPWBC_BRAND_TAXONOMY ) ) {
+		// Apply to the archive main query AND the Elementor "Products (current
+		// query)" widget's own product query (which is not the main query).
+		$post_types = (array) $q->get( 'post_type' );
+		if ( ! $q->is_main_query() && ! in_array( 'product', $post_types, true ) ) {
 			return $clauses;
 		}
 

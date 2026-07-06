@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.17.0
+Stable tag: 1.17.1
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.17.1 =
+* Fix: filters (attribute facets + price) now actually filter the product grid when the archive uses Elementor's "Products (Current Query)" widget. That widget runs its own query via WooCommerce's product-shortcode renderer rather than the page's main query, so the filters weren't being applied to it. They now hook that query too (via `woocommerce_shortcode_products_query` and the product lookup join), while still working with themes that use the native archive loop.
 
 = 1.17.0 =
 * New: optional value normalisation for attribute facets. Turn on "Fold colour values into base colours" (Brand Categories → Cache) and the index groups messy per-product colours ("1 WHITE", "101 WHITE", "320 DARK NAVY") into a tidy palette (White, Navy, …) so the Colour facet is clean and usable. Off by default; a rebuild applies it. Fully customisable via the `jpwbc_af_normalize_value` filter (map any raw value to any canonical label, for colour, size or any attribute).
@@ -172,6 +175,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.17.1 =
+Fixes filters not affecting the grid on archives built with Elementor's "Products (Current Query)" widget.
 
 = 1.17.0 =
 Adds optional colour-value normalisation for the attribute facets (fold "101 WHITE" → "White"). Enable it on the Cache tab and rebuild the index.
