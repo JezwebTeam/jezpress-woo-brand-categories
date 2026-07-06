@@ -502,6 +502,23 @@
 		} );
 	}
 
+	// Close any open filter dropdown when clicking outside it (desktop). The
+	// mobile drawer is exempt — it closes via its backdrop / close button.
+	function bindOutsideClose() {
+		document.addEventListener( 'click', function ( e ) {
+			var bar = document.querySelector( '.jpwbc-filterbar' );
+			if ( ! bar || bar.classList.contains( 'jpwbc-drawer-open' ) ) {
+				return;
+			}
+			var open = bar.querySelectorAll( '.jpwbc-filter[open]' );
+			Array.prototype.forEach.call( open, function ( d ) {
+				if ( ! d.contains( e.target ) ) {
+					d.open = false;
+				}
+			} );
+		} );
+	}
+
 	// Floating "Filter" button: appears once the filter bar scrolls out of view;
 	// click scrolls back to it (desktop) or opens the drawer (mobile).
 	function bindFilterJump() {
@@ -556,5 +573,6 @@
 
 		bindMobileDrawer();
 		bindFilterJump();
+		bindOutsideClose();
 	} );
 }() );

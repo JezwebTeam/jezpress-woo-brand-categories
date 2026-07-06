@@ -704,14 +704,15 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5em;
-	padding: 0.7em 1.3em;
+	padding: 0.7em 1.3em !important;
 	border: 0;
-	border-radius: 999px;
+	border-radius: 999px !important;
 	background: var(--jpwbc-pink);
 	color: #fff;
 	font-weight: 600;
 	cursor: pointer;
 	box-shadow: 0 4px 14px rgba( 0, 0, 0, 0.22 );
+	border: none !important;
 }
 
 .jpwbc-filter-jump[hidden] {
@@ -739,20 +740,21 @@ body.jpwbc-drawer-lock {
 		margin: 0 0 1em;
 	}
 
-	.jpwbc-mobilebar__btn {
-		flex: 1 1 0;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5em;
-		padding: 0.85em 1em;
-		border: 1px solid #d7d7db;
-		border-radius: 999px;
-		background: #fff;
-		font-weight: 600;
-		font-size: 1em;
-		cursor: pointer;
-	}
+    .jpwbc-mobilebar__btn {
+        flex: 1 1 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5em;
+        padding: 0.75em 1em !important;
+        border: 1px solid #d7d7db !important;
+		color: #fff;
+        background: #fff;
+        font-weight: 600;
+        font-size: 1em;
+        cursor: pointer;
+        border-radius: 30px !important;
+    }
 
 	/* The bar becomes an off-canvas drawer, hidden until opened. */
 	.jpwbc-filterbar {
@@ -771,6 +773,7 @@ body.jpwbc-drawer-lock {
 		transition: transform 0.25s ease;
 		visibility: hidden;
 		overflow-y: auto;
+		align-items: unset !important;
 	}
 
 	.jpwbc-filterbar.jpwbc-drawer-open {
@@ -801,7 +804,8 @@ body.jpwbc-drawer-lock {
 		font-size: 1.8em;
 		line-height: 1;
 		cursor: pointer;
-		padding: 0 0.2em;
+		padding: 0 0.2em !important;
+		border: none !important
 	}
 
 	.jpwbc-filterbar__foot {
@@ -822,16 +826,17 @@ body.jpwbc-drawer-lock {
 		white-space: nowrap;
 	}
 
-	.jpwbc-filterbar__done {
-		flex: 1 1 auto;
-		padding: 0.95em;
-		border: 0;
-		border-radius: 8px;
-		background: var(--jpwbc-pink);
-		color: #fff;
-		font-weight: 600;
-		cursor: pointer;
-	}
+    .jpwbc-filterbar__done {
+        flex: 1 1 auto;
+        padding: 0.8em 0.95em !important;
+        border: 0;
+        border-radius: 8px !important;
+        background: var(--jpwbc-pink) !important;
+        color: #fff !important;
+        font-weight: 600 !important;
+        cursor: pointer;
+        text-transform: capitalize !important;
+    }
 
 	/* Filters become full-width accordion rows inside the drawer. */
 	.jpwbc-filter {
