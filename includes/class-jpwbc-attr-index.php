@@ -145,7 +145,6 @@ class JPWBC_Attr_Index {
 		add_action( 'save_post_product', array( $this, 'on_save_post' ) );
 		add_action( self::CRON_HOOK, array( $this, 'run_batch' ) );
 		add_action( 'pre_get_posts', array( $this, 'apply_facet_query' ) );
-		add_filter( 'woocommerce_shortcode_products_query', array( $this, 'products_widget_query' ), 20 );
 		add_filter( 'wp_robots', array( $this, 'filter_wp_robots' ) );
 		add_filter( 'rank_math/frontend/robots', array( $this, 'filter_rank_math_robots' ) );
 
@@ -660,10 +659,18 @@ class JPWBC_Attr_Index {
 	 * @param \WP_Query $q The query being prepared.
 	 */
 	public function apply_facet_query( \WP_Query $q ): void {
-		if ( is_admin() || ! $q->is_main_query() || ! jpwbc_woocommerce_ready() ) {
+		if ( is_admin() || ! jpwbc_woocommerce_ready() ) {
 			return;
 		}
-		if ( '' === (string) $q->get( JPWBC_BRAND_TAXONOMY ) ) {
+		// Brand-archive context: the main query carries the product_brand var (set
+		// at pre_get_posts); secondary product queries (e.g. the Elementor Products
+		// widget, which drives its own loop AND pagination) run later, when is_tax()
+		// is reliable. Catching both keeps the grid and pagination consistent.
+		$is_brand = ( '' !== (string) $q->get( JPWBC_BRAND_TAXONOMY ) ) || is_tax( JPWBC_BRAND_TAXONOMY );
+		if ( ! $is_brand ) {
+			return;
+		}
+		if ( ! $q->is_main_query() && ! in_array( 'product', (array) $q->get( 'post_type' ), true ) ) {
 			return;
 		}
 
@@ -697,57 +704,6 @@ class JPWBC_Attr_Index {
 		}
 
 		$q->set( 'tax_query', $tax_query );
-	}
-
-	/**
-	 * Add the selected facets to the Elementor/WooCommerce "Products" widget query.
-	 *
-	 * The Products (current query) widget renders via WC_Shortcode_Products with
-	 * its OWN query — not the main query — so the pre_get_posts clause above never
-	 * reaches it. This filter (applied by WC_Shortcode_Products::parse_query_args)
-	 * injects the same facet constraints into that query.
-	 *
-	 * @since 1.17.1
-	 *
-	 * @param array<string, mixed> $query_args WP_Query args for the products query.
-	 * @return array<string, mixed>
-	 */
-	public function products_widget_query( $query_args ) {
-		if ( ! is_array( $query_args ) || ! jpwbc_woocommerce_ready() || ! is_tax( JPWBC_BRAND_TAXONOMY ) ) {
-			return $query_args;
-		}
-
-		$selected = $this->selected_facets();
-		if ( empty( $selected ) ) {
-			return $query_args;
-		}
-
-		$tax_query = isset( $query_args['tax_query'] ) && is_array( $query_args['tax_query'] ) ? $query_args['tax_query'] : array();
-		foreach ( $selected as $key => $slugs ) {
-			if ( ! taxonomy_exists( $this->taxonomy_for( $key ) ) ) {
-				continue;
-			}
-			$tax_query[] = array(
-				'taxonomy' => $this->taxonomy_for( $key ),
-				'field'    => 'slug',
-				'terms'    => $slugs,
-				'operator' => 'IN',
-			);
-		}
-
-		$clauses = 0;
-		foreach ( $tax_query as $k => $v ) {
-			if ( 'relation' !== $k ) {
-				++$clauses;
-			}
-		}
-		if ( $clauses > 1 ) {
-			$tax_query['relation'] = 'AND';
-		}
-
-		$query_args['tax_query'] = $tax_query;
-
-		return $query_args;
 	}
 
 	/**

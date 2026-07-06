@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.18.2
+Stable tag: 1.18.3
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.18.3 =
+* Fix: when an attribute facet narrowed the results (e.g. to 2 products), the product grid filtered correctly but the pagination still showed all the brand's pages. The facet filter now also applies to the Elementor Products widget's own query that drives pagination, so the page count matches the filtered results.
 
 = 1.18.2 =
 * Improve: the "Sort by" control is now a custom styled dropdown (matching the other filter dropdowns) instead of a native select, so its options are properly themed. Also fixed an extra gap under the Sort control caused by a theme's default form margin.
@@ -185,6 +188,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.18.3 =
+Fixes pagination showing extra pages when an attribute facet filters the results.
 
 = 1.18.2 =
 Styles the "Sort by" dropdown to match the other filters and removes an extra gap under it. Hard-refresh once.
