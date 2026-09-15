@@ -667,10 +667,20 @@ class JPWBC_Attr_Index {
 		// widget, which drives its own loop AND pagination) run later, when is_tax()
 		// is reliable. Catching both keeps the grid and pagination consistent.
 		$is_brand = ( '' !== (string) $q->get( JPWBC_BRAND_TAXONOMY ) ) || is_tax( JPWBC_BRAND_TAXONOMY );
-		if ( ! $is_brand ) {
+		if ( ! $is_brand && ! self::is_product_archive_context() ) {
 			return;
 		}
 		if ( ! $q->is_main_query() && ! in_array( 'product', (array) $q->get( 'post_type' ), true ) ) {
+			return;
+		}
+		// Hand-picked loops (related products, up-sells, a manual selection) name
+		// their posts outright and are not the archive the filter bar controls.
+		//
+		// Deliberately NOT also skipping no_found_rows queries: that would catch
+		// WC's product widgets, but it would equally catch an archive loop whose
+		// pagination is turned off — and silently not filtering the grid is a far
+		// worse failure than a widget on a filtered page showing filtered items.
+		if ( ! $q->is_main_query() && ! empty( $q->get( 'post__in' ) ) ) {
 			return;
 		}
 
@@ -706,7 +716,27 @@ class JPWBC_Attr_Index {
 	 * @return bool
 	 */
 	private function is_faceted_brand_archive(): bool {
-		return jpwbc_woocommerce_ready() && is_tax( JPWBC_BRAND_TAXONOMY ) && ! empty( $this->selected_facets() );
+		if ( ! jpwbc_woocommerce_ready() || empty( $this->selected_facets() ) ) {
+			return false;
+		}
+		return is_tax( JPWBC_BRAND_TAXONOMY ) || self::is_product_archive_context();
+	}
+
+	/**
+	 * Whether this is a product-category or shop archive.
+	 *
+	 * The Product Category Filter Bar runs on these, so the facet clauses and
+	 * the noindex rule have to reach them as well as brand archives.
+	 *
+	 * @since 1.20.0
+	 *
+	 * @return bool
+	 */
+	public static function is_product_archive_context(): bool {
+		if ( ! function_exists( 'is_shop' ) ) {
+			return false;
+		}
+		return is_tax( 'product_cat' ) || is_shop() || is_post_type_archive( 'product' );
 	}
 
 	/**
@@ -759,8 +789,27 @@ class JPWBC_Attr_Index {
 	 * @return array<int, array{key:string, label:string, values:array<int, array{slug:string, name:string, count:int, selected:bool}>}>
 	 */
 	public function get_brand_facets( int $brand_id, array $allowlist = array() ): array {
+		return $this->get_facets( JPWBC_BRAND_TAXONOMY, $brand_id, $allowlist );
+	}
+
+	/**
+	 * Facets for the products inside any term, or across the whole catalogue.
+	 *
+	 * @since 1.20.0
+	 *
+	 * @param string             $taxonomy  Scoping taxonomy ('' = whole catalogue).
+	 * @param int                $term_id   Scoping term id (0 = whole catalogue).
+	 * @param array<int, string> $allowlist Attribute keys/names to include ([] = all).
+	 * @return array<int, array{key:string, label:string, values:array<int, array{slug:string, name:string, count:int, selected:bool}>}>
+	 */
+	public function get_facets( string $taxonomy, int $term_id, array $allowlist = array() ): array {
 		$attrs = get_option( self::OPT_ATTRS, array() );
-		if ( ! is_array( $attrs ) || empty( $attrs ) || $brand_id <= 0 ) {
+		if ( ! is_array( $attrs ) || empty( $attrs ) ) {
+			return array();
+		}
+		// A scoping taxonomy without a term would count the whole catalogue and
+		// silently mislabel it as that term's facets.
+		if ( '' !== $taxonomy && $term_id <= 0 ) {
 			return array();
 		}
 
@@ -775,10 +824,11 @@ class JPWBC_Attr_Index {
 			$allow_names[] = strtolower( $a );
 		}
 
-		$key    = 'jpwbc_af_counts_' . $brand_id . '_v' . $this->counts_version();
+		$scope  = ( '' === $taxonomy ? 'all' : $taxonomy . '_' . $term_id );
+		$key    = 'jpwbc_af_counts_' . md5( $scope ) . '_v' . $this->counts_version();
 		$counts = get_transient( $key );
 		if ( ! is_array( $counts ) ) {
-			$counts = $this->query_brand_facet_counts( $brand_id, array_map( 'strval', array_keys( $attrs ) ) );
+			$counts = $this->query_facet_counts( $taxonomy, $term_id, array_map( 'strval', array_keys( $attrs ) ) );
 			set_transient( $key, $counts, self::COUNT_TTL );
 		}
 
@@ -835,15 +885,17 @@ class JPWBC_Attr_Index {
 	}
 
 	/**
-	 * Grouped per-value product counts for each attribute within a brand.
+	 * Grouped per-value product counts for each attribute within a scope.
 	 *
 	 * @since 1.14.0
+	 * @since 1.20.0 Scoped to any taxonomy term (or the whole catalogue).
 	 *
-	 * @param int                $brand_id Brand term id.
+	 * @param string             $taxonomy Scoping taxonomy ('' = whole catalogue).
+	 * @param int                $term_id  Scoping term id (0 = whole catalogue).
 	 * @param array<int, string> $keys     Attribute keys.
 	 * @return array<string, array<int, array{slug:string, name:string, count:int}>>
 	 */
-	private function query_brand_facet_counts( int $brand_id, array $keys ): array {
+	private function query_facet_counts( string $taxonomy, int $term_id, array $keys ): array {
 		global $wpdb;
 		$out = array();
 
@@ -853,13 +905,31 @@ class JPWBC_Attr_Index {
 				continue;
 			}
 
+			// The scoping JOIN is omitted entirely for a catalogue-wide count. Its
+			// placeholders stay unresolved until the single prepare() below, so
+			// nothing is ever interpolated pre-escaped into the final statement.
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names are $wpdb props; values are prepared.
+			$scope_join = '';
+			$args       = array();
+			$scope_ids  = jpwbc_scope_term_ids( $taxonomy, $term_id );
+			if ( ! empty( $scope_ids ) ) {
+				// IN (…) rather than = : a category archive includes its children,
+				// so the facets have to count the descendants' products too.
+				$placeholders = implode( ', ', array_fill( 0, count( $scope_ids ), '%d' ) );
+				$scope_join   = "INNER JOIN {$wpdb->term_relationships} tr_b ON tr_b.object_id = p.ID
+					INNER JOIN {$wpdb->term_taxonomy} tt_b ON tt_b.term_taxonomy_id = tr_b.term_taxonomy_id
+						AND tt_b.taxonomy = %s AND tt_b.term_id IN ( {$placeholders} )";
+				$args[]       = $taxonomy;
+				foreach ( $scope_ids as $scope_id ) {
+					$args[] = $scope_id;
+				}
+			}
+			$args[] = $tax;
+
 			$sql = $wpdb->prepare(
 				"SELECT t.slug AS slug, t.name AS name, COUNT( DISTINCT p.ID ) AS cnt
 				FROM {$wpdb->posts} p
-				INNER JOIN {$wpdb->term_relationships} tr_b ON tr_b.object_id = p.ID
-				INNER JOIN {$wpdb->term_taxonomy} tt_b ON tt_b.term_taxonomy_id = tr_b.term_taxonomy_id
-					AND tt_b.taxonomy = %s AND tt_b.term_id = %d
+				{$scope_join}
 				INNER JOIN {$wpdb->term_relationships} tr_a ON tr_a.object_id = p.ID
 				INNER JOIN {$wpdb->term_taxonomy} tt_a ON tt_a.term_taxonomy_id = tr_a.term_taxonomy_id
 					AND tt_a.taxonomy = %s
@@ -868,9 +938,7 @@ class JPWBC_Attr_Index {
 				GROUP BY t.slug, t.name
 				HAVING cnt > 0
 				ORDER BY t.name ASC",
-				JPWBC_BRAND_TAXONOMY,
-				$brand_id,
-				$tax
+				$args
 			);
 			$rows = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

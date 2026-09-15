@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.19.3
+Stable tag: 1.20.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,7 @@ On a brand archive (for example `/brands/dmc/`), visitors can narrow the listing
 * Optional brand search box; every brand in the list is expandable to reveal its categories inline (lazy-loaded).
 * Combo Preview admin tab (per-brand categories, counts, generated URLs, indexing status) and a Cache tab with object-cache status and a one-click rebuild.
 * Style tab with colour pickers (active/highlight, toggle chevron, hover accent) — no CSS editing required.
+* Product Category Filter Bar widget/shortcode `[jpwbc_category_filter]` for product category and shop archives — the same Category/Price/Sort/attribute controls, where the Category dropdown lists the whole category tree grouped by parent, each parent expanding in place to reveal its subcategories.
 * Trending Brands widget/shortcode — shows the most-clicked brands (click-tracked, cache-safe), with a sensible fallback so it's never empty.
 * All Brands (A-Z) widget/shortcode — an alphabet jump-index plus brands grouped under a heading per letter (empty letters are never shown as lonely rows).
 
@@ -77,6 +78,12 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.20.0 =
+* New: "Product Category Filter Bar" Elementor widget and `[jpwbc_category_filter]` shortcode for product category and shop archives — the category-archive counterpart to the Brand Filter Bar, with the same Category / Price / Sort / attribute controls and the same styling.
+* New: its Category dropdown lists every product category grouped under its parent. Parents that have subcategories show a chevron that expands them in place; the branch containing the category you're viewing starts expanded. Choosing a category goes to WooCommerce's own category archive URL, so those pages stay canonical and indexable.
+* New: the price range, attribute facets and their counts are now calculated for whichever category you're viewing (or across the whole catalogue on the shop archive), not just per brand.
+* Improve: price and attribute filtering, and the `noindex,follow` rule for filtered views, now apply on product category and shop archives as well as brand archives.
 
 = 1.19.3 =
 * Fix: on a clean brand+category URL (e.g. `/brands/birch-creative/quilting-threads/`) the product grid showed the filtered products but the pagination still listed every page of the whole brand. The category clause now also reaches the Elementor Products widget's own loop and pagination queries, so the page count matches the filtered results.
@@ -203,6 +210,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.20.0 =
+Adds the Product Category Filter Bar widget for category and shop archives. Hard-refresh once so the new script/styles load.
 
 = 1.19.3 =
 Fixes pagination showing every brand page on a brand+category combo URL.

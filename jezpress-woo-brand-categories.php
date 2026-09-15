@@ -3,7 +3,7 @@
  * Plugin Name: JezPress Woo Brand Categories
  * Plugin URI: https://jezpress.com/plugins/jezpress-woo-brand-categories
  * Description: In-brand product-category navigation and clean brand+category URLs for WooCommerce brand archives.
- * Version: 1.19.3
+ * Version: 1.20.0
  * Author: Jezweb
  * Author URI: https://jezpress.com
  * License: GPL-2.0+
@@ -76,7 +76,7 @@ if ( version_compare( PHP_VERSION, '8.1.0', '<' ) ) {
  *
  * @since 1.0.0
  */
-define( 'JPWBC_VERSION', '1.19.3' );
+define( 'JPWBC_VERSION', '1.20.0' );
 define( 'JPWBC_PLUGIN_FILE', __FILE__ );
 define( 'JPWBC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JPWBC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -229,6 +229,42 @@ function jpwbc_load_textdomain(): void {
 	);
 }
 add_action( 'init', 'jpwbc_load_textdomain' );
+
+/**
+ * The term ids a taxonomy scope covers, including descendants.
+ *
+ * A product_cat archive query includes child categories (include_children is
+ * on by default for hierarchical taxonomies), but term_relationships holds no
+ * ancestor rows — a product filed under a child is not related to the parent.
+ * Scoping a count or aggregate to the parent id alone would therefore return
+ * nothing for any category whose products all live in its children.
+ *
+ * @since 1.20.0
+ *
+ * @param string $taxonomy Taxonomy name.
+ * @param int    $term_id  Term id.
+ * @return array<int, int> The term id plus every descendant id.
+ */
+function jpwbc_scope_term_ids( string $taxonomy, int $term_id ): array {
+	if ( '' === $taxonomy || $term_id <= 0 ) {
+		return array();
+	}
+
+	// Uncapped by design: this is the same expansion WP core's own tax_query
+	// include_children performs, so the IN list is never wider than the query
+	// WordPress would already be running for the archive itself.
+	$ids = array( $term_id );
+	if ( is_taxonomy_hierarchical( $taxonomy ) ) {
+		$children = get_term_children( $term_id, $taxonomy );
+		if ( is_array( $children ) ) {
+			foreach ( $children as $child ) {
+				$ids[] = (int) $child;
+			}
+		}
+	}
+
+	return array_values( array_unique( array_map( 'intval', $ids ) ) );
+}
 
 /**
  * AND extra tax_query clauses onto a query's existing ones.
@@ -497,6 +533,7 @@ function jpwbc_register_elementor_widget( $widgets_manager ): void {
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-widget.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-brand-chips.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-brand-filter.php';
+	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-category-filter.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-trending.php';
 	require_once JPWBC_PLUGIN_DIR . 'includes/class-jpwbc-elementor-brands-az.php';
 
@@ -508,6 +545,9 @@ function jpwbc_register_elementor_widget( $widgets_manager ): void {
 	}
 	if ( class_exists( 'JPWBC_Elementor_Brand_Filter' ) ) {
 		$widgets_manager->register( new JPWBC_Elementor_Brand_Filter() );
+	}
+	if ( class_exists( 'JPWBC_Elementor_Category_Filter' ) ) {
+		$widgets_manager->register( new JPWBC_Elementor_Category_Filter() );
 	}
 	if ( class_exists( 'JPWBC_Elementor_Trending' ) ) {
 		$widgets_manager->register( new JPWBC_Elementor_Trending() );

@@ -252,6 +252,31 @@
 		} );
 	}
 
+	// Category tree: the chevron beside a parent category expands its
+	// subcategories in place. Delegated at document level so the handler keeps
+	// working after an AJAX swap replaces the bar, with nothing to rebind. (The
+	// swap does reset which branches are expanded; the server re-opens the one
+	// holding the current category.)
+	function bindCategoryExpand() {
+		document.addEventListener( 'click', function ( e ) {
+			var btn = e.target && e.target.closest ? e.target.closest( '[data-jpwbc-expand]' ) : null;
+			if ( ! btn ) {
+				return;
+			}
+			var branch = btn.closest( '.jpwbc-filter__branch' );
+			if ( ! branch ) {
+				return;
+			}
+			// The chevron only expands — it must not follow the category link
+			// next to it, nor close the dropdown it lives in.
+			e.preventDefault();
+			e.stopPropagation();
+
+			var open = branch.classList.toggle( 'is-open' );
+			btn.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+		} );
+	}
+
 	// Filter bar: only one dropdown open at a time (accordion). Works with or
 	// without AJAX. Re-applied to the fresh bar after each AJAX swap.
 	function bindAccordion( bar ) {
@@ -580,5 +605,6 @@
 		bindMobileDrawer();
 		bindFilterJump();
 		bindOutsideClose();
+		bindCategoryExpand();
 	} );
 }() );

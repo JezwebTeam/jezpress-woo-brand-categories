@@ -167,6 +167,8 @@ class JPWBC_Rewrites {
 			// Hand-picked product queries (related products, up-sells, cross-sells,
 			// a manual Elementor selection) name their posts outright — they are
 			// not the archive loop and must not be narrowed to the combo category.
+			// (no_found_rows is deliberately not used as a second signal: it would
+			// also exclude an archive loop that has pagination switched off.)
 			if ( ! empty( $wp_query->get( 'post__in' ) ) ) {
 				return;
 			}

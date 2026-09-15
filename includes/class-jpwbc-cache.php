@@ -59,6 +59,28 @@ class JPWBC_Cache {
 		add_action( 'trashed_post', array( $this, 'on_trashed_post' ) );
 		add_action( 'untrashed_post', array( $this, 'on_trashed_post' ) );
 		add_action( 'set_object_terms', array( $this, 'on_set_object_terms' ), 10, 6 );
+
+		// Term lifecycle: renaming a category changes its permalink and deleting
+		// one must drop it from the cached lists. Only assignment changes were
+		// busting the cache before, so an edited term could linger for the TTL.
+		add_action( 'created_term', array( $this, 'on_term_changed' ), 10, 3 );
+		add_action( 'edited_term', array( $this, 'on_term_changed' ), 10, 3 );
+		add_action( 'delete_term', array( $this, 'on_term_changed' ), 10, 3 );
+	}
+
+	/**
+	 * Bust when one of our taxonomies' terms is created, edited or deleted.
+	 *
+	 * @since 1.20.0
+	 *
+	 * @param int    $term_id  Term id (unused).
+	 * @param int    $tt_id    Term taxonomy id (unused).
+	 * @param string $taxonomy Taxonomy the term belongs to.
+	 */
+	public function on_term_changed( $term_id, $tt_id, $taxonomy = '' ): void {
+		if ( in_array( (string) $taxonomy, array( JPWBC_BRAND_TAXONOMY, JPWBC_CAT_TAXONOMY ), true ) ) {
+			$this->bust();
+		}
 	}
 
 	/**
@@ -69,6 +91,22 @@ class JPWBC_Cache {
 	 * @return int
 	 */
 	public function version(): int {
+		return self::current_version();
+	}
+
+	/**
+	 * The cache version without needing an instance.
+	 *
+	 * Callers that only need a cache-key stamp (and have no JPWBC_Cache handle)
+	 * use this. It is an option, so it is stable across requests even with no
+	 * persistent object cache — unlike wp_cache_get_last_changed(), which would
+	 * mint a new key every request and write a fresh transient each page view.
+	 *
+	 * @since 1.20.0
+	 *
+	 * @return int
+	 */
+	public static function current_version(): int {
 		return max( 1, (int) get_option( self::VERSION_OPTION, 1 ) );
 	}
 
