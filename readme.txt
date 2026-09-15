@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.19.1
+Stable tag: 1.19.2
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,11 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.19.2 =
+* Fix: the per-option product counts in the filter dropdowns no longer break across two lines next to a long option name (a count of "50" could render as "5" above "0").
+* Improve: re-opening a long dropdown now starts at the top of the list instead of keeping its previous scroll position, which could leave the first option clipped.
+* Improve: slightly wider dropdown panels so longer category names have more room, and the panel's scrolling no longer chains to the page behind it.
 
 = 1.19.1 =
 * Improve: an open filter dropdown now closes when you click anywhere outside it (not only when you click its button again).
@@ -195,6 +200,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.19.2 =
+Tidies the filter dropdowns: counts no longer wrap onto two lines. Hard-refresh once so the new styles load.
 
 = 1.19.1 =
 Filter dropdowns now close on outside click.

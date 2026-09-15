@@ -407,9 +407,10 @@
 	z-index: 30;
 	top: calc( 100% + 0.5em );
 	left: 0;
-	min-width: 250px;
+	min-width: 270px;
 	max-height: 60vh;
 	overflow: auto;
+	overscroll-behavior: contain;
 	padding: 0.5em;
 	background: #fff;
 	border: 1px solid #ececef;
@@ -450,7 +451,22 @@
 	font-weight: 600;
 }
 
+/* Option label takes the free space; it may wrap, the count never does. */
+.jpwbc-filter__opt-name {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+/*
+ * The count is a fixed-size flex item: without flex-shrink:0 + nowrap a
+ * two-digit count next to a long category name gets squeezed and breaks
+ * across lines ("50" rendering as "5" over "0").
+ */
 .jpwbc-filter__opt-count {
+	flex: 0 0 auto;
+	white-space: nowrap;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
 	color: #9a9aa0;
 	font-size: 0.85em;
 	margin-left: auto;

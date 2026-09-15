@@ -261,6 +261,12 @@
 				if ( ! d.open ) {
 					return;
 				}
+				// A scrollable panel keeps its previous scroll offset, which
+				// leaves the first option clipped under the panel's top edge.
+				var panel = d.querySelector( '.jpwbc-filter__panel' );
+				if ( panel ) {
+					panel.scrollTop = 0;
+				}
 				Array.prototype.forEach.call( items, function ( other ) {
 					if ( other !== d ) {
 						other.open = false;
