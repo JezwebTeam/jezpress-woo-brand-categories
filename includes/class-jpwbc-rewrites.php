@@ -48,6 +48,20 @@ class JPWBC_Rewrites {
 	private bool $invalid_combo = false;
 
 	/**
+	 * The validated combo category slug for this request ('' = not a combo).
+	 *
+	 * Set once, on the main query, after the brand + category pairing has been
+	 * validated. Secondary product queries (the Elementor Products widget's
+	 * loop and its pagination query) reuse it instead of re-validating — they
+	 * never carry the jpwbc_cat query var, since query vars come from the URL
+	 * for the main query only.
+	 *
+	 * @since 1.19.3
+	 * @var string
+	 */
+	private string $active_cat = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
@@ -136,7 +150,27 @@ class JPWBC_Rewrites {
 	 * @param \WP_Query $wp_query The query being prepared.
 	 */
 	public function filter_archive_query( \WP_Query $wp_query ): void {
-		if ( ! $wp_query->is_main_query() || is_admin() ) {
+		if ( is_admin() ) {
+			return;
+		}
+
+		// Secondary product queries on the combo archive — the Elementor Products
+		// widget runs its own loop query AND a separate pagination query, neither
+		// of which carries jpwbc_cat. Without this the grid shows the filtered
+		// products while the pagination still counts every product in the brand.
+		if ( ! $wp_query->is_main_query() ) {
+			if ( '' === $this->active_cat
+				|| ! in_array( 'product', (array) $wp_query->get( 'post_type' ), true )
+				|| ! is_tax( JPWBC_BRAND_TAXONOMY ) ) {
+				return;
+			}
+			// Hand-picked product queries (related products, up-sells, cross-sells,
+			// a manual Elementor selection) name their posts outright — they are
+			// not the archive loop and must not be narrowed to the combo category.
+			if ( ! empty( $wp_query->get( 'post__in' ) ) ) {
+				return;
+			}
+			$this->append_cat_clause( $wp_query, $this->active_cat );
 			return;
 		}
 
@@ -165,13 +199,84 @@ class JPWBC_Rewrites {
 			return;
 		}
 
-		$tax_query   = (array) $wp_query->get( 'tax_query' );
-		$tax_query[] = array(
-			'taxonomy' => JPWBC_CAT_TAXONOMY,
-			'field'    => 'slug',
-			'terms'    => $cat_slug,
+		$this->active_cat = $cat_slug;
+		$this->append_cat_clause( $wp_query, $cat_slug );
+	}
+
+	/**
+	 * Append the AND product_cat clause for a combo category to a query.
+	 *
+	 * @since 1.19.3
+	 *
+	 * @param \WP_Query $wp_query The query being prepared.
+	 * @param string    $cat_slug Validated category slug.
+	 */
+	private function append_cat_clause( \WP_Query $wp_query, string $cat_slug ): void {
+		$tax_query = (array) $wp_query->get( 'tax_query' );
+
+		// The Elementor Products widget's "Current Query" mode inherits the main
+		// query's vars, so its loop query already carries this clause. Adding it
+		// again would only cost a duplicate term-relationship JOIN.
+		if ( $this->has_cat_clause( $tax_query, $cat_slug ) ) {
+			return;
+		}
+
+		$wp_query->set(
+			'tax_query',
+			jpwbc_tax_query_and(
+				$tax_query,
+				array(
+					array(
+						'taxonomy' => JPWBC_CAT_TAXONOMY,
+						'field'    => 'slug',
+						'terms'    => $cat_slug,
+					),
+				)
+			)
 		);
-		$wp_query->set( 'tax_query', $tax_query );
+	}
+
+	/**
+	 * Whether a tax_query already restricts results to a category slug.
+	 *
+	 * Walks nested clause groups, and only counts an including clause — a
+	 * NOT IN / NOT EXISTS clause naming the same slug excludes the category
+	 * rather than selecting it, so our clause is still needed.
+	 *
+	 * @since 1.19.3
+	 *
+	 * @param array<int|string, mixed> $tax_query A tax_query or clause group.
+	 * @param string                   $cat_slug  Category slug to look for.
+	 * @return bool
+	 */
+	private function has_cat_clause( array $tax_query, string $cat_slug ): bool {
+		foreach ( $tax_query as $key => $clause ) {
+			if ( 'relation' === $key || ! is_array( $clause ) ) {
+				continue;
+			}
+
+			// A nested clause group — recurse.
+			if ( ! isset( $clause['taxonomy'] ) ) {
+				if ( $this->has_cat_clause( $clause, $cat_slug ) ) {
+					return true;
+				}
+				continue;
+			}
+
+			$operator = strtoupper( (string) ( $clause['operator'] ?? 'IN' ) );
+			if ( 'IN' !== $operator ) {
+				continue;
+			}
+
+			$terms = isset( $clause['terms'] ) ? (array) $clause['terms'] : array();
+			if ( JPWBC_CAT_TAXONOMY === ( $clause['taxonomy'] ?? '' )
+				&& 'slug' === ( $clause['field'] ?? '' )
+				&& in_array( $cat_slug, array_map( 'strval', $terms ), true ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

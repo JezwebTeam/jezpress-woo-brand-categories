@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.19.2
+Stable tag: 1.19.3
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.19.3 =
+* Fix: on a clean brand+category URL (e.g. `/brands/birch-creative/quilting-threads/`) the product grid showed the filtered products but the pagination still listed every page of the whole brand. The category clause now also reaches the Elementor Products widget's own loop and pagination queries, so the page count matches the filtered results.
 
 = 1.19.2 =
 * Fix: the per-option product counts in the filter dropdowns no longer break across two lines next to a long option name (a count of "50" could render as "5" above "0").
@@ -200,6 +203,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.19.3 =
+Fixes pagination showing every brand page on a brand+category combo URL.
 
 = 1.19.2 =
 Tidies the filter dropdowns: counts no longer wrap onto two lines. Hard-refresh once so the new styles load.

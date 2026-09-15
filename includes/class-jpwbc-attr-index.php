@@ -679,12 +679,12 @@ class JPWBC_Attr_Index {
 			return;
 		}
 
-		$tax_query = (array) $q->get( 'tax_query' );
+		$clauses = array();
 		foreach ( $selected as $key => $slugs ) {
 			if ( ! taxonomy_exists( $this->taxonomy_for( $key ) ) ) {
 				continue;
 			}
-			$tax_query[] = array(
+			$clauses[] = array(
 				'taxonomy' => $this->taxonomy_for( $key ),
 				'field'    => 'slug',
 				'terms'    => $slugs,
@@ -692,18 +692,10 @@ class JPWBC_Attr_Index {
 			);
 		}
 
-		// Count real (numeric-keyed) clauses; force AND when more than one.
-		$clauses = 0;
-		foreach ( $tax_query as $k => $v ) {
-			if ( 'relation' !== $k ) {
-				++$clauses;
-			}
-		}
-		if ( $clauses > 1 ) {
-			$tax_query['relation'] = 'AND';
-		}
-
-		$q->set( 'tax_query', $tax_query );
+		// Nest rather than force `relation` onto the existing group: overwriting
+		// it would turn a deliberate OR group (e.g. another plugin's multi-select
+		// category filter) into an intersection.
+		$q->set( 'tax_query', jpwbc_tax_query_and( (array) $q->get( 'tax_query' ), $clauses ) );
 	}
 
 	/**

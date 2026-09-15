@@ -3,7 +3,7 @@
  * Plugin Name: JezPress Woo Brand Categories
  * Plugin URI: https://jezpress.com/plugins/jezpress-woo-brand-categories
  * Description: In-brand product-category navigation and clean brand+category URLs for WooCommerce brand archives.
- * Version: 1.19.2
+ * Version: 1.19.3
  * Author: Jezweb
  * Author URI: https://jezpress.com
  * License: GPL-2.0+
@@ -76,7 +76,7 @@ if ( version_compare( PHP_VERSION, '8.1.0', '<' ) ) {
  *
  * @since 1.0.0
  */
-define( 'JPWBC_VERSION', '1.19.2' );
+define( 'JPWBC_VERSION', '1.19.3' );
 define( 'JPWBC_PLUGIN_FILE', __FILE__ );
 define( 'JPWBC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JPWBC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -229,6 +229,43 @@ function jpwbc_load_textdomain(): void {
 	);
 }
 add_action( 'init', 'jpwbc_load_textdomain' );
+
+/**
+ * AND extra tax_query clauses onto a query's existing ones.
+ *
+ * Nests rather than flattens. Appending a clause to a tax_query whose own
+ * relation is OR and then forcing the top-level relation to AND would silently
+ * turn that OR group into an intersection; wrapping the existing group keeps
+ * its relation intact while still intersecting our clause against it.
+ *
+ * @since 1.19.3
+ *
+ * @param array<int|string, mixed>         $existing    The query's current tax_query.
+ * @param array<int, array<string, mixed>> $new_clauses Clauses to AND in.
+ * @return array<int|string, mixed> The combined tax_query.
+ */
+function jpwbc_tax_query_and( array $existing, array $new_clauses ): array {
+	$new_clauses = array_values( $new_clauses );
+	if ( empty( $new_clauses ) ) {
+		return $existing;
+	}
+
+	$has_existing = false;
+	foreach ( $existing as $key => $clause ) {
+		if ( 'relation' !== $key ) {
+			$has_existing = true;
+			break;
+		}
+	}
+
+	if ( ! $has_existing ) {
+		return count( $new_clauses ) > 1
+			? array_merge( array( 'relation' => 'AND' ), $new_clauses )
+			: $new_clauses;
+	}
+
+	return array_merge( array( 'relation' => 'AND', $existing ), $new_clauses );
+}
 
 /**
  * Locate and load a plugin template, allowing theme overrides.
