@@ -55,6 +55,14 @@ gh run watch <id> --exit-status
 It gates on header/const/Stable-tag version match — a failure here means step 1 was incomplete. The Node-20 deprecation annotation is a warning only.
 
 ## 7. Download the built zip + upload to JezPress
+> **CI cannot do this reliably.** `~/.jezpress-token` is a ~30-day JWT refreshed only by
+> interactive `jezpress login`, so a `JEZPRESS_TOKEN` repo secret expires within the month
+> and the workflow's upload step then fails with `Not logged in` (the GitHub release itself
+> still builds — check `gh release view` before assuming a red run means a failed release).
+> Upload from here instead. Check the token BEFORE starting a release; if it has expired,
+> stop cleanly at this step, leave the server advertising the previous version, HOLD the
+> Google Chat card, and record the ledger row as `skipped`/`pending`.
+
 Run as separate commands (a combined `rm && mkdir && download && upload` chain gets denied):
 ```bash
 mkdir -p /tmp/rel<XYZ>
@@ -73,12 +81,38 @@ The dashboard reads `plugin.sections.description` / `plugin.sections.changelog` 
 - **Description** = the `== Description ==` block converted to HTML (`<p>`, `<h3>`, `<ul>/<li>`, `<strong>`, `<code>`).
 - **Changelog** = ALL versions, newest-first, as plain text `Version X.Y.Z` headers with `  - bullet` lines.
 
-Write each to a **local** temp `.json` file (Windows Python cannot write to `/tmp`; `json.dump` escapes non-ASCII, so console mojibake is cosmetic). Body shape: `{"description": "<html>", "sections": {"description": "<html>"}}` and `{"changelog": "<text>", "sections": {"changelog": "<text>"}}`. Then PATCH **sequentially** (desc first, then chlog — the server clobbers parallel writes):
+**PATCH ONCE, with both sections in one body.** The server replaces the whole
+`plugin.sections` object on every write, so a changelog-only PATCH can wipe the
+description a previous PATCH set. Send one file:
+
+```json
+{"description":"<html>","changelog":"<text>","sections":{"description":"<html>","changelog":"<text>"}}
+```
+
+**Fold the payload to ASCII first.** `ensure_ascii=True` is NOT enough — the server
+mis-encodes real UTF-8 punctuation on the way in, and the Changelog tab is an
+aggregate, so one folded PATCH repairs every historical entry at once:
+
+```python
+_ASCII = {0x2018:"'",0x2019:"'",0x201C:'"',0x201D:'"',0x2013:'-',0x2014:'-',
+          0x2026:'...',0x00A0:' ',0x2022:'-',0x00B7:'-',0x00D7:'x',0x2192:'->'}
+def to_ascii(t): return t.translate(_ASCII).encode('ascii','ignore').decode('ascii')
+assert desc.isascii() and chlog.isascii()
+```
+
 ```bash
 curl -s -X PATCH -H "Authorization: Bearer $(cat ~/.jezpress-token)" -H "Content-Type: application/json" \
   --data-binary @<file> "https://updates.jezpress.com/api/dev/plugins/{PLUGIN_SLUG}" -o /dev/null -w "HTTP %{http_code}\n"
 ```
-Delete the temp files after; verify both `sections` lengths are non-zero.
+
+**Ordering + verification.** Any `PATCH /versions/<ver>` clobbers `sections`
+*eventually*, so do every version-level write FIRST and make this combined PATCH
+the LAST write to the plugin record. Writes are eventually consistent and return
+200 without persisting, so verify in a **write-then-verify loop** (re-PATCH until
+the stored lengths match), then re-read once more a minute later — that settled
+read is the only one that counts. Also audit EVERY version's changelog at the end
+of a release, not just the new one (empty or non-ASCII entries show in customers'
+"View details" popup). Delete the temp files after.
 
 ## 10. Append to `.claude/LEDGER.md`
 Add one row (newest first): version, date, audit verdict, one-line summary, and JezPress + dashboard status. The ledger is the durable per-plugin release history — append every release, not just 1.0.0.
