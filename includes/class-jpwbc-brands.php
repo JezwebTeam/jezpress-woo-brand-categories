@@ -147,18 +147,36 @@ class JPWBC_Brands {
 	}
 
 	/**
+	 * Warm the post + meta caches for a set of brand-logo attachments.
+	 *
+	 * @since 1.21.0
+	 *
+	 * @param array<int, int> $ids Attachment ids (may contain 0s/duplicates).
+	 */
+	private function prime_logo_attachments( array $ids ): void {
+		$ids = array_values( array_unique( array_filter( array_map( 'intval', $ids ) ) ) );
+		if ( empty( $ids ) || ! function_exists( '_prime_post_caches' ) ) {
+			return;
+		}
+		// The primitive rather than get_posts(): one SELECT ... IN (), no full
+		// WP_Query, and nothing fired at pre_get_posts for other plugins' hooks
+		// to trip over. Meta is primed too - wp_get_attachment_image() needs it.
+		_prime_post_caches( $ids, false, true );
+	}
+
+	/**
 	 * Get all brands grouped by first letter (A-Z, then # for non-alpha).
 	 *
 	 * @since 1.2.0
 	 *
-	 * @return array<string, array<int, array{term_id:int, name:string, slug:string, url:string}>>
+	 * @return array<string, array<int, array{term_id:int, name:string, slug:string, url:string, thumb_id:int}>>
 	 */
 	public function get_brands_grouped(): array {
 		if ( ! jpwbc_woocommerce_ready() ) {
 			return array();
 		}
 
-		$cache_key = 'jpwbc_allbrands_grouped';
+		$cache_key = 'jpwbc_allbrands_grouped_v' . JPWBC_Cache::current_version();
 		$cached    = get_transient( $cache_key );
 		if ( is_array( $cached ) ) {
 			return $cached;
@@ -176,6 +194,20 @@ class JPWBC_Brands {
 			return array();
 		}
 
+		// get_terms() already bulk-loads term meta, but get_post_type()/
+		// get_post_status() below would be a single-row query per brand.
+		$prime_ids = array();
+		foreach ( $terms as $term ) {
+			if ( ! $term instanceof \WP_Term ) {
+				continue;
+			}
+			$maybe_thumb = (int) get_term_meta( (int) $term->term_id, 'thumbnail_id', true );
+			if ( $maybe_thumb > 0 ) {
+				$prime_ids[] = $maybe_thumb;
+			}
+		}
+		$this->prime_logo_attachments( $prime_ids );
+
 		$groups = array();
 		foreach ( $terms as $term ) {
 			if ( ! $term instanceof \WP_Term ) {
@@ -190,11 +222,21 @@ class JPWBC_Brands {
 			if ( ! preg_match( '/^[A-Z]$/', $first ) ) {
 				$first = '#';
 			}
+			// WooCommerce stores the brand image as the term's thumbnail_id. Most
+			// brands have none, so the logo layout falls back to the name — only
+			// an id pointing at a real attachment counts as a usable logo.
+			$thumb_id = (int) get_term_meta( (int) $term->term_id, 'thumbnail_id', true );
+			if ( $thumb_id > 0
+				&& ( 'attachment' !== get_post_type( $thumb_id ) || 'trash' === get_post_status( $thumb_id ) ) ) {
+				$thumb_id = 0;
+			}
+
 			$groups[ $first ][] = array(
-				'term_id' => (int) $term->term_id,
-				'name'    => $term->name,
-				'slug'    => $term->slug,
-				'url'     => $link,
+				'term_id'  => (int) $term->term_id,
+				'name'     => $term->name,
+				'slug'     => $term->slug,
+				'url'      => $link,
+				'thumb_id' => $thumb_id,
 			);
 		}
 
@@ -281,6 +323,9 @@ class JPWBC_Brands {
 				'show_groups'        => true,
 				'columns'            => 5,
 				'list_columns'       => 1,
+				'brand_layout'       => 'names',
+				'logo_columns'       => 5,
+				'logo_size'          => 'medium',
 				'show_letter_counts' => false,
 				'show_search'        => false,
 				'show_arrow'         => true,
@@ -300,6 +345,21 @@ class JPWBC_Brands {
 
 		jpwbc_enqueue_frontend_assets();
 
+		// Only the logo layout loads images, and the cached $groups array is what
+		// every page view reads - priming solely inside get_brands_grouped() would
+		// have warmed the cache on the once-an-hour rebuild and nowhere else.
+		if ( 'logos' === $args['brand_layout'] ) {
+			$logo_ids = array();
+			foreach ( $groups as $letter_rows ) {
+				foreach ( (array) $letter_rows as $row ) {
+					if ( ! empty( $row['thumb_id'] ) ) {
+						$logo_ids[] = (int) $row['thumb_id'];
+					}
+				}
+			}
+			$this->prime_logo_attachments( $logo_ids );
+		}
+
 		// A unique instance id so multiple widgets on one page have distinct anchors.
 		static $instance = 0;
 		++$instance;
@@ -310,6 +370,14 @@ class JPWBC_Brands {
 		$list_columns = (int) $args['list_columns'];
 		$list_columns = ( $list_columns >= 1 && $list_columns <= 4 ) ? $list_columns : 1;
 
+		$brand_layout = ( 'logos' === $args['brand_layout'] ) ? 'logos' : 'names';
+
+		$logo_columns = (int) $args['logo_columns'];
+		$logo_columns = ( $logo_columns >= 2 && $logo_columns <= 8 ) ? $logo_columns : 5;
+
+		$logo_size = (string) $args['logo_size'];
+		$logo_size = in_array( $logo_size, array( 'thumbnail', 'medium', 'large', 'full' ), true ) ? $logo_size : 'medium';
+
 		return jpwbc_get_template(
 			'all-brands-az.php',
 			array(
@@ -319,6 +387,9 @@ class JPWBC_Brands {
 				'show_groups'        => ! empty( $args['show_groups'] ),
 				'columns'            => $columns,
 				'list_columns'       => $list_columns,
+				'brand_layout'       => $brand_layout,
+				'logo_columns'       => $logo_columns,
+				'logo_size'          => $logo_size,
 				'show_letter_counts' => ! empty( $args['show_letter_counts'] ),
 				'show_search'        => ! empty( $args['show_search'] ),
 				'show_arrow'         => ! empty( $args['show_arrow'] ),
@@ -382,6 +453,9 @@ class JPWBC_Brands {
 				'show_groups'        => 'yes',
 				'columns'            => 5,
 				'list_columns'       => 1,
+				'brand_layout'       => 'names',
+				'logo_columns'       => 5,
+				'logo_size'          => 'medium',
 				'show_letter_counts' => 'no',
 				'show_search'        => 'no',
 				'show_arrow'         => 'yes',
@@ -407,6 +481,9 @@ class JPWBC_Brands {
 				'show_groups'        => $truthy( $atts['show_groups'] ),
 				'columns'            => (int) $atts['columns'],
 				'list_columns'       => (int) $atts['list_columns'],
+				'brand_layout'       => (string) $atts['brand_layout'],
+				'logo_columns'       => (int) $atts['logo_columns'],
+				'logo_size'          => (string) $atts['logo_size'],
 				'show_letter_counts' => $truthy( $atts['show_letter_counts'] ),
 				'show_search'        => $truthy( $atts['show_search'] ),
 				'show_arrow'         => $truthy( $atts['show_arrow'] ),

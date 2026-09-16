@@ -178,6 +178,89 @@
 	padding: 0 !important;
 }
 
+/* Brand logo grid (All Brands A-Z, "Brand logos" layout). */
+.jpwbc-az-group__list--logos {
+	display: grid;
+	gap: 1.25em;
+	align-items: stretch;
+	grid-template-columns: repeat( var( --jpwbc-logo-cols, 5 ), minmax( 0, 1fr ) );
+}
+
+.jpwbc-az-logos--cols-2 { --jpwbc-logo-cols: 2; }
+.jpwbc-az-logos--cols-3 { --jpwbc-logo-cols: 3; }
+.jpwbc-az-logos--cols-4 { --jpwbc-logo-cols: 4; }
+.jpwbc-az-logos--cols-5 { --jpwbc-logo-cols: 5; }
+.jpwbc-az-logos--cols-6 { --jpwbc-logo-cols: 6; }
+.jpwbc-az-logos--cols-7 { --jpwbc-logo-cols: 7; }
+.jpwbc-az-logos--cols-8 { --jpwbc-logo-cols: 8; }
+
+.jpwbc-az-group__list--logos .jpwbc-az-logo {
+	padding: 0;
+}
+
+/* The tile is the link, so the whole area is clickable. Structural properties
+   keep normal specificity - no Elementor control targets them, and at zero
+   specificity a stray theme rule like `ul li a { display: inline }` would
+   flatten the whole grid. */
+.jpwbc-az-group__list--logos .jpwbc-az-logo > a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	text-align: center;
+}
+
+/* Only the control-backed properties are neutered with :where(), so Elementor's
+   `{{WRAPPER}} .jpwbc-az-logo a` (an equal-specificity tie that would otherwise
+   lose on source order, since plugin CSS prints later) wins for these. */
+:where( .jpwbc-az-group__list--logos .jpwbc-az-logo ) > a {
+	min-height: 80px;
+	padding: 0.75em;
+}
+
+/* Logos vary wildly in aspect ratio; contain keeps them from being cropped
+   or stretched, and the max-height comes from the Elementor control. */
+.jpwbc-az-logo__img {
+	max-width: 100%;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+
+:where( .jpwbc-az-logo__img ) {
+	max-height: 80px;
+}
+
+/* Fallback for a brand with no image uploaded yet. */
+.jpwbc-az-logo__name {
+	font-size: 0.95em;
+	line-height: 1.25;
+	overflow-wrap: anywhere;
+}
+
+/* repeat() needs a literal integer, so cap the column count by overriding the
+   custom property rather than wrapping it in min(). */
+@media ( max-width: 768px ) {
+	.jpwbc-az-logos--cols-4,
+	.jpwbc-az-logos--cols-5,
+	.jpwbc-az-logos--cols-6,
+	.jpwbc-az-logos--cols-7,
+	.jpwbc-az-logos--cols-8 {
+		--jpwbc-logo-cols: 3;
+	}
+}
+
+@media ( max-width: 480px ) {
+	.jpwbc-az-logos--cols-3,
+	.jpwbc-az-logos--cols-4,
+	.jpwbc-az-logos--cols-5,
+	.jpwbc-az-logos--cols-6,
+	.jpwbc-az-logos--cols-7,
+	.jpwbc-az-logos--cols-8 {
+		--jpwbc-logo-cols: 2;
+	}
+}
+
 .jpwbc-trending__item,
 .jpwbc-az-group__item {
 	list-style: none !important;
@@ -194,16 +277,18 @@
 }
 
 .jpwbc-trending__item > a,
-.jpwbc-az-group__item > a {
+.jpwbc-az-group__item:not( .jpwbc-az-logo ) > a {
 	color: inherit;
 	text-decoration: none;
 	border-bottom: 1px solid transparent;
 }
 
+/* Logo tiles are excluded above: the underline belongs to a text link, and on a
+   tile it painted a line across the bottom of the whole logo on hover. */
 .jpwbc-trending__item > a:hover,
 .jpwbc-trending__item > a:focus,
-.jpwbc-az-group__item > a:hover,
-.jpwbc-az-group__item > a:focus {
+.jpwbc-az-group__item:not( .jpwbc-az-logo ) > a:hover,
+.jpwbc-az-group__item:not( .jpwbc-az-logo ) > a:focus {
 	color: var(--jpwbc-pink);
 	border-bottom-color: var(--jpwbc-teal);
 }

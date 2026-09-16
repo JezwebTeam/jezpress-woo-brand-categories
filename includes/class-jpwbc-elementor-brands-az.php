@@ -156,6 +156,21 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 		);
 
 		$this->add_control(
+			'brand_layout',
+			array(
+				'label'       => __( 'Brand list layout', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'Logos come from each brand\'s image (Products > Brands > edit a brand > Thumbnail). A brand with no image shows its name instead, so the grid never has holes.', 'jezpress-woo-brand-categories' ),
+				'type'        => \Elementor\Controls_Manager::SELECT,
+				'default'     => 'names',
+				'options'     => array(
+					'names' => __( 'Brand names (list)', 'jezpress-woo-brand-categories' ),
+					'logos' => __( 'Brand logos (grid)', 'jezpress-woo-brand-categories' ),
+				),
+				'condition'   => array( 'show_groups' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
 			'list_columns',
 			array(
 				'label'       => __( 'Brand list columns', 'jezpress-woo-brand-categories' ),
@@ -168,7 +183,52 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 					'3' => '3',
 					'4' => '4',
 				),
-				'condition'   => array( 'show_groups' => 'yes' ),
+				'condition'   => array(
+					'show_groups'  => 'yes',
+					'brand_layout' => 'names',
+				),
+			)
+		);
+
+		$this->add_control(
+			'logo_columns',
+			array(
+				'label'     => __( 'Logos per row', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'default'   => '5',
+				'options'   => array(
+					'2' => '2',
+					'3' => '3',
+					'4' => '4',
+					'5' => '5',
+					'6' => '6',
+					'7' => '7',
+					'8' => '8',
+				),
+				'condition' => array(
+					'show_groups'  => 'yes',
+					'brand_layout' => 'logos',
+				),
+			)
+		);
+
+		$this->add_control(
+			'logo_size',
+			array(
+				'label'       => __( 'Logo image size', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'Which registered image size to load. "Medium" suits most logo grids.', 'jezpress-woo-brand-categories' ),
+				'type'        => \Elementor\Controls_Manager::SELECT,
+				'default'     => 'medium',
+				'options'     => array(
+					'thumbnail' => __( 'Thumbnail', 'jezpress-woo-brand-categories' ),
+					'medium'    => __( 'Medium', 'jezpress-woo-brand-categories' ),
+					'large'     => __( 'Large', 'jezpress-woo-brand-categories' ),
+					'full'      => __( 'Full', 'jezpress-woo-brand-categories' ),
+				),
+				'condition'   => array(
+					'show_groups'  => 'yes',
+					'brand_layout' => 'logos',
+				),
 			)
 		);
 
@@ -424,6 +484,143 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 		);
 
 		$this->end_controls_section();
+
+		$this->register_logo_style_controls();
+	}
+
+	/**
+	 * Style-tab controls for the brand-logo grid.
+	 *
+	 * Only shown when the brand list is set to the logo layout.
+	 *
+	 * @since 1.21.0
+	 */
+	protected function register_logo_style_controls(): void {
+		$this->start_controls_section(
+			'jpwbc_logo_style',
+			array(
+				'label'     => __( 'Brand logos', 'jezpress-woo-brand-categories' ),
+				'tab'       => \Elementor\Controls_Manager::TAB_STYLE,
+				'condition' => array(
+					'show_groups'  => 'yes',
+					'brand_layout' => 'logos',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'logo_height',
+			array(
+				'label'       => __( 'Logo height', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'Logos are scaled to fit this height, keeping their aspect ratio, so mixed-size artwork still lines up.', 'jezpress-woo-brand-categories' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 24,
+						'max' => 240,
+					),
+				),
+				'default'    => array(
+					'unit' => 'px',
+					'size' => 80,
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .jpwbc-az-logo a' => 'min-height: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} .jpwbc-az-logo__img' => 'max-height: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'logo_gap',
+			array(
+				'label'      => __( 'Gap between logos', 'jezpress-woo-brand-categories' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 80,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .jpwbc-az-group__list--logos' => 'gap: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'logo_padding',
+			array(
+				'label'      => __( 'Padding inside each logo', 'jezpress-woo-brand-categories' ),
+				'type'       => \Elementor\Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .jpwbc-az-logo a' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'logo_bg',
+			array(
+				'label'     => __( 'Tile background', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-az-logo a' => 'background-color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			\Elementor\Group_Control_Border::get_type(),
+			array(
+				'name'     => 'logo_border',
+				'selector' => '{{WRAPPER}} .jpwbc-az-logo a',
+			)
+		);
+
+		$this->add_control(
+			'logo_radius',
+			array(
+				'label'      => __( 'Tile corner radius', 'jezpress-woo-brand-categories' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px', '%' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 40,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .jpwbc-az-logo a' => 'border-radius: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			\Elementor\Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'logo_fallback_typography',
+				'label'    => __( 'Fallback name typography', 'jezpress-woo-brand-categories' ),
+				'selector' => '{{WRAPPER}} .jpwbc-az-logo__name',
+			)
+		);
+
+		$this->add_control(
+			'logo_fallback_color',
+			array(
+				'label'       => __( 'Fallback name colour', 'jezpress-woo-brand-categories' ),
+				'description' => __( 'Shown for brands that have no image uploaded yet.', 'jezpress-woo-brand-categories' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .jpwbc-az-logo__name' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
 	}
 
 	/**
@@ -452,6 +649,9 @@ class JPWBC_Elementor_Brands_AZ extends \Elementor\Widget_Base {
 				'show_groups'        => isset( $settings['show_groups'] ) && 'yes' === $settings['show_groups'],
 				'columns'            => isset( $settings['columns'] ) ? (int) $settings['columns'] : 5,
 				'list_columns'       => isset( $settings['list_columns'] ) ? (int) $settings['list_columns'] : 1,
+				'brand_layout'       => isset( $settings['brand_layout'] ) ? (string) $settings['brand_layout'] : 'names',
+				'logo_columns'       => isset( $settings['logo_columns'] ) ? (int) $settings['logo_columns'] : 5,
+				'logo_size'          => isset( $settings['logo_size'] ) ? (string) $settings['logo_size'] : 'medium',
 				'show_letter_counts' => isset( $settings['show_letter_counts'] ) && 'yes' === $settings['show_letter_counts'],
 				'show_search'        => isset( $settings['show_search'] ) && 'yes' === $settings['show_search'],
 				'show_arrow'         => isset( $settings['show_arrow'] ) && 'yes' === $settings['show_arrow'],

@@ -156,8 +156,14 @@
 				var items = group.querySelectorAll( '.jpwbc-az-group__item' );
 				var visible = 0;
 				Array.prototype.forEach.call( items, function ( item ) {
+					// In the logo layout the link holds an <img> and no text, so
+					// textContent alone would match nothing and hide every brand.
 					var link = item.querySelector( 'a' );
-					var name = link ? link.textContent.trim().toLowerCase() : '';
+					var name = item.getAttribute( 'data-jpwbc-name' );
+					if ( ! name ) {
+						name = link ? link.textContent : '';
+					}
+					name = name.trim().toLowerCase();
 					var match = '' === q || name.indexOf( q ) !== -1;
 					item.style.display = match ? '' : 'none';
 					if ( match ) {

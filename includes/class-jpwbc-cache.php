@@ -66,6 +66,33 @@ class JPWBC_Cache {
 		add_action( 'created_term', array( $this, 'on_term_changed' ), 10, 3 );
 		add_action( 'edited_term', array( $this, 'on_term_changed' ), 10, 3 );
 		add_action( 'delete_term', array( $this, 'on_term_changed' ), 10, 3 );
+
+		// Uploading a brand logo writes term meta, not the term row, so the term
+		// hooks above never fire and the cached brand list would keep serving
+		// rows with no logo until the TTL lapsed.
+		add_action( 'added_term_meta', array( $this, 'on_term_meta_changed' ), 10, 3 );
+		add_action( 'updated_term_meta', array( $this, 'on_term_meta_changed' ), 10, 3 );
+		add_action( 'deleted_term_meta', array( $this, 'on_term_meta_changed' ), 10, 3 );
+	}
+
+	/**
+	 * Bust when a cached term meta value changes on one of our taxonomies.
+	 *
+	 * @since 1.21.0
+	 *
+	 * @param int|array $meta_id  Meta id (unused).
+	 * @param int       $term_id  Term the meta belongs to.
+	 * @param string    $meta_key Meta key being written.
+	 */
+	public function on_term_meta_changed( $meta_id, $term_id, $meta_key = '' ): void {
+		if ( 'thumbnail_id' !== (string) $meta_key ) {
+			return;
+		}
+		$term = get_term( (int) $term_id );
+		if ( $term instanceof \WP_Term
+			&& in_array( $term->taxonomy, array( JPWBC_BRAND_TAXONOMY, JPWBC_CAT_TAXONOMY ), true ) ) {
+			$this->bust();
+		}
 	}
 
 	/**

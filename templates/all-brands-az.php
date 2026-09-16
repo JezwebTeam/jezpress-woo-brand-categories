@@ -49,6 +49,11 @@ $jpwbc_cols      = ( $jpwbc_cols >= 3 && $jpwbc_cols <= 6 ) ? $jpwbc_cols : 5;
 $jpwbc_list_cols = isset( $data['list_columns'] ) ? (int) $data['list_columns'] : 1;
 $jpwbc_list_cols = ( $jpwbc_list_cols >= 1 && $jpwbc_list_cols <= 4 ) ? $jpwbc_list_cols : 1;
 $jpwbc_counts    = ! empty( $data['show_letter_counts'] );
+$jpwbc_layout    = ( isset( $data['brand_layout'] ) && 'logos' === $data['brand_layout'] ) ? 'logos' : 'names';
+$jpwbc_logo_cols = isset( $data['logo_columns'] ) ? (int) $data['logo_columns'] : 5;
+$jpwbc_logo_cols = ( $jpwbc_logo_cols >= 2 && $jpwbc_logo_cols <= 8 ) ? $jpwbc_logo_cols : 5;
+$jpwbc_logo_size = isset( $data['logo_size'] ) ? (string) $data['logo_size'] : 'medium';
+$jpwbc_logo_size = in_array( $jpwbc_logo_size, array( 'thumbnail', 'medium', 'large', 'full' ), true ) ? $jpwbc_logo_size : 'medium';
 $jpwbc_search    = ! empty( $data['show_search'] );
 $jpwbc_ix_layout = ( isset( $data['index_layout'] ) && 'inline' === $data['index_layout'] ) ? 'inline' : 'grid';
 $jpwbc_sticky    = ! empty( $data['sticky_index'] );
@@ -149,17 +154,60 @@ $jpwbc_alphabet = array_merge( range( 'A', 'Z' ), array( '#' ) );
 							<span class="jpwbc-az-group__count">(<?php echo esc_html( (string) count( $jpwbc_brands ) ); ?>)</span>
 						<?php endif; ?>
 					</h4>
-					<ul class="jpwbc-az-group__list jpwbc-az-group__list--cols-<?php echo esc_attr( (string) $jpwbc_list_cols ); ?>">
-						<?php foreach ( $jpwbc_brands as $jpwbc_brand ) : ?>
-							<?php if ( '' === (string) $jpwbc_brand['url'] ) { continue; } ?>
-							<li class="jpwbc-az-group__item">
-								<a href="<?php echo esc_url( (string) $jpwbc_brand['url'] ); ?>"
-									data-jpwbc-brand="<?php echo esc_attr( (string) (int) $jpwbc_brand['term_id'] ); ?>">
-									<?php echo esc_html( (string) $jpwbc_brand['name'] ); ?>
-								</a>
-							</li>
-						<?php endforeach; ?>
-					</ul>
+					<?php if ( 'logos' === $jpwbc_layout ) : ?>
+						<ul class="jpwbc-az-group__list jpwbc-az-group__list--logos jpwbc-az-logos--cols-<?php echo esc_attr( (string) $jpwbc_logo_cols ); ?>">
+							<?php foreach ( $jpwbc_brands as $jpwbc_brand ) : ?>
+								<?php
+								if ( '' === (string) $jpwbc_brand['url'] ) {
+									continue;
+								}
+								$jpwbc_thumb = isset( $jpwbc_brand['thumb_id'] ) ? (int) $jpwbc_brand['thumb_id'] : 0;
+
+								// Decide on the RENDERED markup, not on the id: core returns an
+								// empty string whenever the image can't be built (file gone,
+								// missing attachment metadata, a non-image attachment), which
+								// would otherwise leave an empty tile and a link with no
+								// accessible name. wp_get_attachment_image() escapes the
+								// attributes itself, so `alt` is passed raw.
+								$jpwbc_img = $jpwbc_thumb > 0
+									? wp_get_attachment_image(
+										$jpwbc_thumb,
+										$jpwbc_logo_size,
+										false,
+										array(
+											'class'   => 'jpwbc-az-logo__img',
+											'alt'     => (string) $jpwbc_brand['name'],
+											'loading' => 'lazy',
+										)
+									)
+									: '';
+								?>
+								<li class="jpwbc-az-group__item jpwbc-az-logo<?php echo '' === $jpwbc_img ? ' jpwbc-az-logo--nologo' : ''; ?>"
+									data-jpwbc-name="<?php echo esc_attr( (string) $jpwbc_brand['name'] ); ?>">
+									<a href="<?php echo esc_url( (string) $jpwbc_brand['url'] ); ?>"
+										data-jpwbc-brand="<?php echo esc_attr( (string) (int) $jpwbc_brand['term_id'] ); ?>">
+										<?php if ( '' !== $jpwbc_img ) : ?>
+											<?php echo $jpwbc_img; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core-generated <img> markup, attributes escaped by wp_get_attachment_image(). ?>
+										<?php else : ?>
+											<span class="jpwbc-az-logo__name"><?php echo esc_html( (string) $jpwbc_brand['name'] ); ?></span>
+										<?php endif; ?>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php else : ?>
+						<ul class="jpwbc-az-group__list jpwbc-az-group__list--cols-<?php echo esc_attr( (string) $jpwbc_list_cols ); ?>">
+							<?php foreach ( $jpwbc_brands as $jpwbc_brand ) : ?>
+								<?php if ( '' === (string) $jpwbc_brand['url'] ) { continue; } ?>
+								<li class="jpwbc-az-group__item" data-jpwbc-name="<?php echo esc_attr( (string) $jpwbc_brand['name'] ); ?>">
+									<a href="<?php echo esc_url( (string) $jpwbc_brand['url'] ); ?>"
+										data-jpwbc-brand="<?php echo esc_attr( (string) (int) $jpwbc_brand['term_id'] ); ?>">
+										<?php echo esc_html( (string) $jpwbc_brand['name'] ); ?>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php endif; ?>
 				</section>
 			<?php endforeach; ?>
 		</div>

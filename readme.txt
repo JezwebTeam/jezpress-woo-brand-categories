@@ -6,7 +6,7 @@ Tested up to: 6.7
 Requires PHP: 8.1
 WC requires at least: 9.6
 WC tested up to: 10.8
-Stable tag: 1.20.0
+Stable tag: 1.21.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,6 +31,7 @@ On a brand archive (for example `/brands/dmc/`), visitors can narrow the listing
 * Style tab with colour pickers (active/highlight, toggle chevron, hover accent) — no CSS editing required.
 * Product Category Filter Bar widget/shortcode `[jpwbc_category_filter]` for product category and shop archives — the same Category/Price/Sort/attribute controls, where the Category dropdown lists the whole category tree grouped by parent, each parent expanding in place to reveal its subcategories.
 * Trending Brands widget/shortcode — shows the most-clicked brands (click-tracked, cache-safe), with a sensible fallback so it's never empty.
+* All Brands (A-Z) can show brands as a grid of brand logos across the page instead of a name list, taken from each brand's image; brands with no image show their name, so the grid never has gaps.
 * All Brands (A-Z) widget/shortcode — an alphabet jump-index plus brands grouped under a heading per letter (empty letters are never shown as lonely rows).
 
 = Requirements =
@@ -78,6 +79,12 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 4. The Combo Preview tab showing per-brand categories, counts, URLs and indexing status.
 
 == Changelog ==
+
+= 1.21.0 =
+* New: the All Brands (A-Z) widget and `[jpwbc_all_brands]` shortcode gain a "Brand list layout" option - keep the existing name list, or show each letter's brands as a grid of brand logos across the page.
+* New: logos come from the brand's own image (Products > Brands > edit a brand > Thumbnail). Controls for logos per row (2-8), which image size to load, logo height, gap, tile padding, background, border, corner radius, and the fallback name's typography and colour.
+* New: a brand with no image uploaded yet shows its name in the tile instead, so the grid never has holes - and the live brand search still finds those brands.
+* Fix: uploading or changing a brand image now clears the cached brand list immediately, instead of the new logo taking up to an hour to appear.
 
 = 1.20.0 =
 * New: "Product Category Filter Bar" Elementor widget and `[jpwbc_category_filter]` shortcode for product category and shop archives — the category-archive counterpart to the Brand Filter Bar, with the same Category / Price / Sort / attribute controls and the same styling.
@@ -210,6 +217,9 @@ The dropdown inherits your theme's styles. It ships with a shortcode, an Element
 * Combo Preview and Cache admin tabs.
 
 == Upgrade Notice ==
+
+= 1.21.0 =
+Adds a brand-logo grid layout to All Brands (A-Z). Set it under the widget's "Brand list layout" option; upload each logo as the brand's Thumbnail image.
 
 = 1.20.0 =
 Adds the Product Category Filter Bar widget for category and shop archives. Hard-refresh once so the new script/styles load.
